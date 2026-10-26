@@ -380,7 +380,50 @@ nav a.active {
     padding: 20px;
   }
 }
+.contact-page {
+  max-width: 650px;
+  margin: 60px auto;
+  padding: 20px;
+  text-align: center;
+}
 
+.contact-page h1 {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.contact-page p {
+  color: #64748b;
+  margin-bottom: 30px;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.contact-form input,
+.contact-form textarea {
+  padding: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.contact-form textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.contact-form button {
+  cursor: pointer;
+}
+
+.success-message {
+  margin-top: 20px;
+  color: #15803d !important;
+}
 
 
 
