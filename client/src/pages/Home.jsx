@@ -1,5 +1,5 @@
 
-import Hero from '../components/Hero'
+import Hero from '../Components/Hero'
 
 function Home() {
   return (
@@ -7,7 +7,7 @@ function Home() {
       <Hero />
 
       <section className="about">
-        <h2>Welcome to EduClass</h2>
+        <h2>Welcome to Nextgen Education Academy  </h2>
         <p>
           Quality education for Grade 10 and Grade 11
           students through physical and online classes.

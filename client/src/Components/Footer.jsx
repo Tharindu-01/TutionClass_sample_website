@@ -1,10 +1,15 @@
 
 function Footer() {
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer>
-      <p>© 2026 EduClass. All rights reserved.</p>
+    <footer className="footer">
+      <p>
+        © {currentYear} NextGen Education Academy.
+        All Rights Reserved.
+      </p>
     </footer>
-  )
+  );
 }
 
-export default Footer
+export default Footer;

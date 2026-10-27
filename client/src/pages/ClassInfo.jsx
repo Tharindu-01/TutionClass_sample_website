@@ -1,49 +1,101 @@
 
-import { useParams, Link } from 'react-router'
-import { classes } from '../data/classes'
+import { Link, useParams } from "react-router";
+import { classes } from "../data/classes";
 
 function ClassInfo() {
-  const { id } = useParams()
+  // Get class ID from the URL
+  const { id } = useParams();
 
+  // Find the selected class
   const selectedClass = classes.find(
     (item) => String(item.id) === id
-  )
+  );
 
+  // If class does not exist
   if (!selectedClass) {
     return (
-      <section className="page-section">
-        <h1>Class Not Found</h1>
-        <p>Sorry, this class is not available.</p>
-
+      <section className="class-info-page">
+        <h2>Class Not Found</h2>
+        <p>The requested class is not available.</p>
         <Link to="/classes" className="primary-button">
           Back to Classes
         </Link>
       </section>
-    )
+    );
   }
 
   return (
-    <section className="page-section class-info-page">
+    <section className="class-info-page">
       <Link to="/classes" className="back-link">
         ← Back to Classes
       </Link>
 
-      <h1>{selectedClass.subject}</h1>
-      <p>Grade {selectedClass.grade}</p>
+      <div className="class-info-container">
+        <div className="class-info-header">
+          <span className="grade-badge">
+            Grade {selectedClass.grade}
+          </span>
 
-      <div className="class-info-card">
-        <h2>Class Information</h2>
+          <h1>{selectedClass.subject}</h1>
+          <p>NextGen Education Academy</p>
+        </div>
 
-        <p><strong>Subject:</strong> {selectedClass.subject}</p>
-        <p><strong>Teacher:</strong> {selectedClass.teacher}</p>
-        <p><strong>Day:</strong> {selectedClass.day}</p>
-        <p><strong>Time:</strong> {selectedClass.time}</p>
-        <p><strong>Hall:</strong> {selectedClass.hall}</p>
-        <p><strong>Class Mode:</strong> {selectedClass.mode}</p>
-        <p><strong>Contact:</strong> {selectedClass.phone}</p>
+        <div className="class-info-grid">
+          <div className="info-item">
+            <h4>Teacher</h4>
+            <p>{selectedClass.teacher}</p>
+          </div>
+
+          <div className="info-item">
+            <h4>Day</h4>
+            <p>{selectedClass.day}</p>
+          </div>
+
+          <div className="info-item">
+            <h4>Time</h4>
+            <p>{selectedClass.time}</p>
+          </div>
+
+          <div className="info-item">
+            <h4>Hall</h4>
+            <p>{selectedClass.hall}</p>
+          </div>
+
+          <div className="info-item">
+            <h4>Class Mode</h4>
+            <p>{selectedClass.mode}</p>
+          </div>
+
+          <div className="info-item">
+            <h4>Contact Number</h4>
+            <p>{selectedClass.phone}</p>
+          </div>
+        </div>
+
+        <div className="class-about">
+          <h3>About This Class</h3>
+          <p>
+            Join our {selectedClass.subject} class for
+            Grade {selectedClass.grade} students at
+            NextGen Education Academy.
+          </p>
+        </div>
+
+        <div className="class-info-actions">
+          <a
+            href={`tel:${selectedClass.phone}`}
+            className="primary-button"
+          >
+            Contact Teacher
+          </a>
+
+          <Link to="/timetable" className="outline-button">
+            View Timetable
+          </Link>
+        </div>
       </div>
     </section>
-  )
+  );
 }
 
-export default ClassInfo
+export default ClassInfo;

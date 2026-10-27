@@ -1,23 +1,56 @@
 
-import { Link } from 'react-router'
+import { Link } from "react-router";
 
 function Hero() {
   return (
-    <section className="hero">
-      <span className="tag">Grade 10 & 11 Education</span>
+    <section className="nextgen-hero">
+      <div className="nextgen-hero-content">
 
-      <h1>Learn Better. Achieve More.</h1>
+        <span className="hero-label">
+          GRADE 10 & 11 EDUCATION
+        </span>
 
-      <p>
-        Quality education for O/L students through
-        physical and online classes.
-      </p>
+        <h1>
+          Build Your Future with
+          <span> NextGen Education Academy</span>
+        </h1>
 
-      <Link to="/classes" className="primary-button">
-        Explore Classes
-      </Link>
+        <p>
+          Quality education, experienced teachers,
+          and flexible learning opportunities
+          for O/L students.
+        </p>
+
+        <div className="hero-actions">
+          <Link to="/classes" className="hero-primary">
+            Explore Classes
+          </Link>
+
+          <Link to="/timetable" className="hero-secondary">
+            View Timetable
+          </Link>
+        </div>
+
+        <div className="hero-highlights">
+          <div>
+            <strong>10 & 11</strong>
+            <span>Grades</span>
+          </div>
+
+          <div>
+            <strong>Online</strong>
+            <span>Learning</span>
+          </div>
+
+          <div>
+            <strong>Physical</strong>
+            <span>Classes</span>
+          </div>
+        </div>
+
+      </div>
     </section>
-  )
+  );
 }
 
-export default Hero
+export default Hero;

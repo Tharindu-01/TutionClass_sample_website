@@ -8,7 +8,7 @@ function Navbar() {
 
   return (
     <header className="navbar">
-      <h2>EduClass</h2>
+      <h2>NextGen Education Academy</h2>
 
       <button
         className="menu-toggle"

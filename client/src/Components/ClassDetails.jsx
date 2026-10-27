@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link } from "react-router";
 import { classes } from "../data/classes";
@@ -18,7 +19,7 @@ function ClassDetails() {
     ...new Set(gradeClasses.map((item) => item.subject)),
   ];
 
-  // Filter by subject and search text
+  // Filter classes by subject and search
   const filteredClasses = gradeClasses.filter((item) => {
     const matchesSubject =
       selectedSubject === "All" ||
@@ -33,8 +34,16 @@ function ClassDetails() {
     return matchesSubject && matchesSearch;
   });
 
+  // Change selected grade
   function changeGrade(grade) {
     setSelectedGrade(grade);
+    setSelectedSubject("All");
+    setSearchTerm("");
+  }
+
+  // Reset all filters
+  function resetFilters() {
+    setSelectedGrade(10);
     setSelectedSubject("All");
     setSearchTerm("");
   }
@@ -44,8 +53,10 @@ function ClassDetails() {
       <h2>Explore Our Classes</h2>
       <p>Select your grade and find your classes.</p>
 
+      {/* Grade Filter */}
       <div className="filter-buttons">
         <button
+          type="button"
           className={selectedGrade === 10 ? "active" : ""}
           onClick={() => changeGrade(10)}
         >
@@ -53,6 +64,7 @@ function ClassDetails() {
         </button>
 
         <button
+          type="button"
           className={selectedGrade === 11 ? "active" : ""}
           onClick={() => changeGrade(11)}
         >
@@ -60,6 +72,7 @@ function ClassDetails() {
         </button>
       </div>
 
+      {/* Subject Filter */}
       <div className="subject-filter">
         <label htmlFor="subject">Select Subject</label>
 
@@ -91,30 +104,73 @@ function ClassDetails() {
         />
       </div>
 
-      <div className="class-grid">
-        {filteredClasses.map((item) => (
-          <div className="class-card" key={item.id}>
-            <h3>{item.subject}</h3>
+      {/* Class Count and Reset Button */}
+      <div className="class-results">
+        <p>
+          Showing <strong>{filteredClasses.length}</strong>{" "}
+          {filteredClasses.length === 1 ? "class" : "classes"}
+        </p>
 
-            <p><strong>Grade:</strong> {item.grade}</p>
-            <p><strong>Teacher:</strong> {item.teacher}</p>
-            <p><strong>Day:</strong> {item.day}</p>
-            <p><strong>Time:</strong> {item.time}</p>
-            <p><strong>Hall:</strong> {item.hall}</p>
-            <p><strong>Mode:</strong> {item.mode}</p>
-
-            <Link
-              to={`/classes/${item.id}`}
-              className="primary-button"
-            >
-              View Details
-            </Link>
-          </div>
-        ))}
+        <button
+          type="button"
+          className="reset-button"
+          onClick={resetFilters}
+        >
+          Reset Filters
+        </button>
       </div>
 
+      {/* Class Cards */}
+      
+{/* Class Cards */}
+<div className="class-grid">
+  {filteredClasses.map((item) => (
+    <div className="class-card" key={item.id}>
+
+      <div className="card-header">
+        <span className="grade-badge">
+          Grade {item.grade}
+        </span>
+        <span className="card-category">
+          Subject Class
+        </span>
+      </div>
+
+      <h3>{item.subject}</h3>
+
+      <p className="card-description">
+        Learn with experienced teachers at
+        NextGen Education Academy.
+      </p>
+
+      <div className="card-info">
+        <p><strong>Teacher:</strong> {item.teacher}</p>
+        <p><strong>Day:</strong> {item.day}</p>
+        <p><strong>Time:</strong> {item.time}</p>
+        <p><strong>Hall:</strong> {item.hall}</p>
+      </div>
+
+      <span className="mode-badge">
+        {item.mode}
+      </span>
+
+      <Link
+        to={`/classes/${item.id}`}
+        className="primary-button card-button"
+      >
+        View Details →
+      </Link>
+
+    </div>
+  ))}
+</div>
+
+
+      {/* No Results Message */}
       {filteredClasses.length === 0 && (
-        <p>No matching classes found.</p>
+        <p className="no-results">
+          No matching classes found.
+        </p>
       )}
     </section>
   );
