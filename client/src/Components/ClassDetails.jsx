@@ -1,48 +1,59 @@
-
-import { useState } from 'react'
-import { Link } from 'react-router'
-import { classes } from '../data/classes'
+import { useState } from "react";
+import { Link } from "react-router";
+import { classes } from "../data/classes";
 
 function ClassDetails() {
-  const [selectedGrade, setSelectedGrade] = useState(10)
-  const [selectedSubject, setSelectedSubject] = useState('All')
+  const [selectedGrade, setSelectedGrade] = useState(10);
+  const [selectedSubject, setSelectedSubject] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
 
+  // Filter classes by grade
   const gradeClasses = classes.filter(
     (item) => item.grade === selectedGrade
-  )
+  );
 
+  // Get subjects for selected grade
   const subjects = [
-    'All',
-    ...new Set(gradeClasses.map((item) => item.subject))
-  ]
+    "All",
+    ...new Set(gradeClasses.map((item) => item.subject)),
+  ];
 
-  const filteredClasses = gradeClasses.filter(
-    (item) =>
-      selectedSubject === 'All' ||
-      item.subject === selectedSubject
-  )
+  // Filter by subject and search text
+  const filteredClasses = gradeClasses.filter((item) => {
+    const matchesSubject =
+      selectedSubject === "All" ||
+      item.subject === selectedSubject;
+
+    const search = searchTerm.trim().toLowerCase();
+
+    const matchesSearch =
+      item.subject.toLowerCase().includes(search) ||
+      item.teacher.toLowerCase().includes(search);
+
+    return matchesSubject && matchesSearch;
+  });
 
   function changeGrade(grade) {
-    setSelectedGrade(grade)
-    setSelectedSubject('All')
+    setSelectedGrade(grade);
+    setSelectedSubject("All");
+    setSearchTerm("");
   }
 
   return (
     <section className="classes">
-        
       <h2>Explore Our Classes</h2>
-      <p>Select your grade and subject to view class details.</p>
+      <p>Select your grade and find your classes.</p>
 
       <div className="filter-buttons">
         <button
-          className={selectedGrade === 10 ? 'active' : ''}
+          className={selectedGrade === 10 ? "active" : ""}
           onClick={() => changeGrade(10)}
         >
           Grade 10
         </button>
 
         <button
-          className={selectedGrade === 11 ? 'active' : ''}
+          className={selectedGrade === 11 ? "active" : ""}
           onClick={() => changeGrade(11)}
         >
           Grade 11
@@ -59,10 +70,25 @@ function ClassDetails() {
         >
           {subjects.map((subject) => (
             <option key={subject} value={subject}>
-              {subject === 'All' ? 'All Subjects' : subject}
+              {subject === "All" ? "All Subjects" : subject}
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Search Bar */}
+      <div className="class-search">
+        <label htmlFor="class-search-input">
+          Search Classes
+        </label>
+
+        <input
+          id="class-search-input"
+          type="search"
+          placeholder="Search subject or teacher..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
       <div className="class-grid">
@@ -88,10 +114,10 @@ function ClassDetails() {
       </div>
 
       {filteredClasses.length === 0 && (
-        <p>No classes available.</p>
+        <p>No matching classes found.</p>
       )}
     </section>
-  )
+  );
 }
 
-export default ClassDetails
+export default ClassDetails;
