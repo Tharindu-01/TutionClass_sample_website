@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { NavLink } from "react-router";
+import { Link, NavLink } from "react-router";
+import logo from "../assets/nextgen-logo.png";
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -8,7 +9,12 @@ function Navbar() {
 
   return (
     <header className="navbar">
-      <h2>NextGen Education Academy</h2>
+      <Link to="/" className="navbar-logo">
+  <img
+    src={logo}
+    alt="NextGen Education Academy"
+  />
+</Link>
 
       <button
         className="menu-toggle"

@@ -10,6 +10,7 @@ import Classes from './pages/Classes'
 import ClassInfo from './pages/ClassInfo'
 import Timetable from './pages/Timetable'
 import Contact from './pages/Contact'
+import TeacherProfile from "./pages/TeacherProfile";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="/classes/:id" element={<ClassInfo />} />
           <Route path="/timetable" element={<Timetable />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/teachers/:id" element={<TeacherProfile />} />
         </Routes>
       </main>
 
