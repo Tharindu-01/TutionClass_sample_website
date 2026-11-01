@@ -12,6 +12,12 @@ import Timetable from './pages/Timetable'
 import Contact from './pages/Contact'
 import TeacherProfile from "./pages/TeacherProfile";
 
+import Teachers from "./pages/Teachers";
+
+
+
+
+
 function App() {
   return (
     <div className="app">
@@ -25,6 +31,9 @@ function App() {
           <Route path="/timetable" element={<Timetable />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/teachers/:id" element={<TeacherProfile />} />
+          
+           <Route path="/teachers" element={<Teachers />} />
+
         </Routes>
       </main>
 

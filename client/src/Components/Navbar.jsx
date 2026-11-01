@@ -33,6 +33,9 @@ function Navbar() {
       >
         <NavLink to="/" onClick={closeMenu}>Home</NavLink>
         <NavLink to="/classes" onClick={closeMenu}>Classes</NavLink>
+        
+        <NavLink to="/teachers">Teachers</NavLink>
+
         <NavLink to="/timetable" onClick={closeMenu}>Timetable</NavLink>
         <NavLink to="/contact" onClick={closeMenu}>Contact</NavLink>
       </nav>
