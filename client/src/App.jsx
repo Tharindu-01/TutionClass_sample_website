@@ -13,6 +13,10 @@ import Contact from './pages/Contact'
 import TeacherProfile from "./pages/TeacherProfile";
 
 import Teachers from "./pages/Teachers";
+import Register from "./pages/Register";
+import Login from "./pages/Login";
+import StudentDashboard from "./pages/StudentDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 
 
 
@@ -32,7 +36,14 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/teachers/:id" element={<TeacherProfile />} />
           
-           <Route path="/teachers" element={<Teachers />} />
+          
+          <Route path="/teachers" element={<Teachers />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/student/dashboard" element={<StudentDashboard />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+
+  
 
         </Routes>
       </main>

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, NavLink } from "react-router";
 import logo from "../assets/nextgen-logo.png";
@@ -9,13 +10,19 @@ function Navbar() {
 
   return (
     <header className="navbar">
-      <Link to="/" className="navbar-logo">
-  <img
-    src={logo}
-    alt="NextGen Education Academy"
-  />
-</Link>
+      {/* Academy Logo */}
+      <Link
+        to="/"
+        className="navbar-logo"
+        onClick={closeMenu}
+      >
+        <img
+          src={logo}
+          alt="NextGen Education Academy"
+        />
+      </Link>
 
+      {/* Mobile Menu Button */}
       <button
         className="menu-toggle"
         type="button"
@@ -27,26 +34,69 @@ function Navbar() {
         {menuOpen ? "✕" : "☰"}
       </button>
 
+      {/* Navigation Links */}
       <nav
         id="main-navigation"
         className={`nav-links ${menuOpen ? "open" : ""}`}
       >
-        <NavLink to="/" onClick={closeMenu}>Home</NavLink>
-        <NavLink to="/classes" onClick={closeMenu}>Classes</NavLink>
-        
-        <NavLink to="/teachers">Teachers</NavLink>
+        <NavLink to="/" end onClick={closeMenu}>
+          Home
+        </NavLink>
 
-        <NavLink to="/timetable" onClick={closeMenu}>Timetable</NavLink>
-        <NavLink to="/contact" onClick={closeMenu}>Contact</NavLink>
+        <NavLink to="/classes" onClick={closeMenu}>
+          Classes
+        </NavLink>
+
+        <NavLink to="/teachers" onClick={closeMenu}>
+          Teachers
+        </NavLink>
+
+        <NavLink to="/timetable" onClick={closeMenu}>
+          Timetable
+        </NavLink>
+
+        <NavLink to="/contact" onClick={closeMenu}>
+          Contact
+        </NavLink>
+
+        {/* Mobile Authentication Buttons */}
+        <div className="mobile-auth">
+          <NavLink
+            to="/login"
+            className="mobile-login"
+            onClick={closeMenu}
+          >
+            Login
+          </NavLink>
+
+          <NavLink
+            to="/register"
+            className="mobile-register"
+            onClick={closeMenu}
+          >
+            Register
+          </NavLink>
+        </div>
       </nav>
 
-      <NavLink
-        to="/classes"
-        className="nav-button"
-        onClick={closeMenu}
-      >
-        Explore Classes
-      </NavLink>
+      {/* Desktop Authentication Buttons */}
+      <div className="nav-auth">
+        <NavLink
+          to="/login"
+          className="nav-login"
+          onClick={closeMenu}
+        >
+          Login
+        </NavLink>
+
+        <NavLink
+          to="/register"
+          className="nav-register"
+          onClick={closeMenu}
+        >
+          Get Started
+        </NavLink>
+      </div>
     </header>
   );
 }
