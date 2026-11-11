@@ -3201,4 +3201,88 @@ nav a.active {
   }
 }
 
+/* ====================================
+   STUDENT DASHBOARD - PAYMENT STYLES
+==================================== */
+
+.payment-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 14px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.payment-status.paid {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.payment-status.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.student-payment-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.student-payment-summary-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.student-payment-summary-card span {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.student-payment-summary-card h3 {
+  margin: 10px 0 0;
+  font-size: 30px;
+  color: #0f172a;
+}
+
+.student-payment-note {
+  margin-top: 20px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+@media (max-width: 600px) {
+  .student-payment-summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Student sidebar menu visibility fix */
+
+.student-sidebar {
+  overflow-y: auto;
+}
+
+.student-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: auto;
+  max-height: none;
+  overflow: visible;
+}
+
+.student-sidebar-nav button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  flex-shrink: 0;
+}
+
 
