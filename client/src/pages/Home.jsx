@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import { classes } from "../data/classes";
 import WhyChooseUs from "../Components/WhyChooseUs";
 import TeachersSection from "../Components/TeachersSection";
+import FeaturedClasses from "../Components/FeaturedClasses";
 
 function Home() {
   const featuredClasses = classes.slice(0, 4);
