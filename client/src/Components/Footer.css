@@ -1,0 +1,258 @@
+
+/* ========================================
+   NEXTGEN EDUCATION ACADEMY
+   PREMIUM FOOTER
+======================================== */
+
+.ng-footer {
+  position: relative;
+  width: 100%;
+  background: #0b1730;
+  color: #ffffff;
+  font-family: "Inter", sans-serif;
+  overflow: hidden;
+}
+
+.ng-footer * {
+  box-sizing: border-box;
+}
+
+.ng-footer-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 55px 5% 0;
+}
+
+/* ===== FOOTER GRID ===== */
+
+.ng-footer-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr 1.2fr;
+  gap: 48px;
+  padding-bottom: 48px;
+}
+
+/* ===== BRAND SECTION ===== */
+
+.ng-footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 13px;
+  text-decoration: none;
+  margin-bottom: 18px;
+}
+
+.ng-footer-logo {
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.ng-footer-brand:hover .ng-footer-logo {
+  transform: scale(1.08);
+}
+
+.ng-footer-brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ng-footer-brand-text h3 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 750;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  color: #ffffff;
+}
+
+.ng-footer-brand-text span {
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 1.2px;
+  color: #93c5fd;
+}
+
+.ng-footer-description {
+  max-width: 310px;
+  margin: 0 0 18px;
+  color: #a9bdd9;
+  font-size: 12px;
+  line-height: 1.9;
+}
+
+.ng-footer-brand-tag {
+  display: inline-flex;
+  padding: 8px 13px;
+  border: 1px solid rgba(147, 197, 253, 0.18);
+  border-radius: 30px;
+  background: rgba(37, 99, 235, 0.08);
+  color: #93c5fd;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+/* ===== FOOTER COLUMNS ===== */
+
+.ng-footer-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 13px;
+}
+
+.ng-footer-column h4 {
+  margin: 0 0 8px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.ng-footer-column > a:not(.ng-footer-contact-button) {
+  color: #a9bdd9;
+  font-size: 12px;
+  text-decoration: none;
+  transition:
+    color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.ng-footer-column > a:not(.ng-footer-contact-button):hover {
+  color: #60a5fa;
+  transform: translateX(4px);
+}
+
+/* ===== CONTACT SECTION ===== */
+
+.ng-footer-contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: #a9bdd9;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.ng-footer-contact-item svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #60a5fa;
+}
+
+.ng-footer-contact-item a {
+  color: #a9bdd9;
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+
+.ng-footer-contact-item a:hover {
+  color: #60a5fa;
+}
+
+.ng-footer-contact-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 10px 16px;
+  border: 1px solid rgba(96, 165, 250, 0.25);
+  border-radius: 9px;
+  background: rgba(37, 99, 235, 0.15);
+  color: #bfdbfe;
+  font-size: 12px;
+  font-weight: 650;
+  text-decoration: none;
+  transition:
+    background 0.3s ease,
+    transform 0.3s ease;
+}
+
+.ng-footer-contact-button:hover {
+  background: rgba(37, 99, 235, 0.3);
+  transform: translateY(-2px);
+}
+
+/* ===== BOTTOM FOOTER ===== */
+
+.ng-footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 23px 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.ng-footer-bottom p {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+.ng-footer-bottom-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ng-footer-bottom-right svg {
+  color: #60a5fa;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 1000px) {
+  .ng-footer-grid {
+    grid-template-columns: 1.5fr 1fr;
+    gap: 35px;
+  }
+}
+
+@media (max-width: 600px) {
+  .ng-footer-container {
+    padding: 40px 6% 0;
+  }
+
+  .ng-footer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 32px 20px;
+    padding-bottom: 35px;
+  }
+
+  .ng-footer-brand-section {
+    grid-column: 1 / -1;
+  }
+
+  .ng-footer-contact {
+    grid-column: 1 / -1;
+  }
+
+  .ng-footer-description {
+    max-width: 100%;
+  }
+
+  .ng-footer-bottom {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+    padding: 20px 0;
+  }
+
+  .ng-footer-logo {
+    width: 49px;
+    height: 49px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ng-footer-logo,
+  .ng-footer-column a,
+  .ng-footer-contact-button {
+    transition: none;
+  }
+}

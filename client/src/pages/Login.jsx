@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { Link } from "react-router";
+import "./Login.css";
 
 function Login() {
   const [form, setForm] = useState({
@@ -40,7 +41,16 @@ function Login() {
       <div className="auth-container">
 
         {/* Left Branding Panel */}
-        <aside className="auth-brand">
+        <aside
+          className="auth-brand"
+          style={{
+            backgroundImage:
+             'linear-gradient(110deg, rgba(5,24,60,0.85), rgba(12,47,105,0.55)), url("/images/login-background.jpg")',
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
+          }}
+        >
           <div className="auth-brand-icon">✦</div>
 
           <span className="auth-eyebrow">

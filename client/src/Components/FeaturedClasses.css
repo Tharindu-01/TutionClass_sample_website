@@ -1,0 +1,146 @@
+
+/* =====================================
+   NEXTGEN FEATURED CLASSES SECTION
+===================================== */
+
+.ng-featured-section {
+  padding: 85px 5%;
+  background:
+    radial-gradient(
+      circle at 10% 20%,
+      rgba(37, 99, 235, 0.08),
+      transparent 35%
+    ),
+    linear-gradient(180deg, #ffffff, #f1f7ff);
+}
+
+.ng-featured-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.ng-featured-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 42px;
+}
+
+.ng-featured-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 15px;
+  padding: 9px 15px;
+  border-radius: 50px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.ng-featured-heading h2 {
+  margin: 0 0 12px;
+  color: #0f172a;
+  font-size: clamp(30px, 4vw, 46px);
+  font-weight: 800;
+}
+
+.ng-featured-heading h2 span {
+  background: linear-gradient(120deg, #2563eb, #06b6d4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.ng-featured-heading p {
+  margin: 0;
+  color: #64748b;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.ng-featured-explore {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 20px;
+  border: 1px solid #bfdbfe;
+  border-radius: 40px;
+  background: #ffffff;
+  color: #2563eb;
+  font-weight: 750;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.ng-featured-explore:hover {
+  background: #2563eb;
+  color: #ffffff;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2);
+}
+
+/* Featured cards grid */
+
+.ng-featured-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+  align-items: stretch;
+}
+
+/* Tablet */
+
+@media (max-width: 1100px) {
+  .ng-featured-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 650px) {
+  .ng-featured-section {
+    padding: 60px 5%;
+  }
+
+  .ng-featured-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .ng-featured-heading h2 {
+    font-size: 32px;
+  }
+
+  .ng-featured-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+}
+.ng-featured-section {
+  padding: 85px 5%;
+}
+
+.ng-featured-container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+.ng-featured-heading h2 {
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.8px;
+  line-height: 1.3;
+}
+
+@media (max-width: 650px) {
+  .ng-featured-heading h2 {
+    font-size: 26px;
+  }
+}

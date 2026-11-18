@@ -2,12 +2,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 
-import hero1 from "../assets/hero/hero1.png";
+
 import hero2 from "../assets/hero/hero2.jpg";
 import hero3 from "../assets/hero/hero3.jpg";
 
 const slides = [
-  { image: hero1, alt: "Students attending a tuition class" },
+  
   { image: hero2, alt: "Teacher conducting a class" },
   { image: hero3, alt: "Students studying in a lecture hall" },
 ];

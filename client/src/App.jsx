@@ -18,6 +18,7 @@ import Login from "./pages/Login";
 import StudentDashboard from "./pages/StudentDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import "./App.css";
+import ScrollToTop from "./Components/ScrollToTop";
 
 
 
@@ -25,8 +26,11 @@ import "./App.css";
 
 
 function App() {
+  
   return (
     <div className="app">
+      <ScrollToTop />
+
       <Navbar />
 
       <main>
@@ -36,23 +40,25 @@ function App() {
           <Route path="/classes/:id" element={<ClassInfo />} />
           <Route path="/timetable" element={<Timetable />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/teachers/:id" element={<TeacherProfile />} />
-          
-          
           <Route path="/teachers" element={<Teachers />} />
+          <Route path="/teachers/:id" element={<TeacherProfile />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/student/dashboard" element={<StudentDashboard />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-
-  
-
+          <Route
+            path="/student/dashboard"
+            element={<StudentDashboard />}
+          />
+          <Route
+            path="/admin/dashboard"
+            element={<AdminDashboard />}
+          />
         </Routes>
       </main>
 
       <Footer />
     </div>
-  )
+  );
 }
+
 
 export default App

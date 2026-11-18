@@ -1,0 +1,163 @@
+
+/* Shared NextGen Premium Class Card */
+
+.ng-class-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #dbeafe;
+  border-radius: 24px;
+  box-shadow: 0 8px 28px rgba(37, 99, 235, .07);
+  transition: transform .35s ease, box-shadow .35s ease;
+}
+
+.ng-class-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 22px 48px rgba(37, 99, 235, .18);
+}
+
+.ng-class-header {
+  position: relative;
+  overflow: hidden;
+  min-height: 180px;
+  padding: 24px;
+  background: linear-gradient(125deg, #0ea5e9, #2563eb 55%, #1e40af);
+  color: white;
+}
+
+.ng-class-header::after {
+  content: "";
+  position: absolute;
+  width: 190px;
+  height: 190px;
+  top: -75px;
+  right: -65px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .12);
+  pointer-events: none;
+}
+
+.ng-class-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.ng-class-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .18);
+  border: 1px solid rgba(255, 255, 255, .3);
+  color: white;
+  transition: transform .35s ease;
+}
+
+.ng-class-card:hover .ng-class-icon {
+  transform: rotate(-8deg) scale(1.1);
+}
+
+.ng-class-grade {
+  padding: 9px 15px;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, .2);
+  color: white;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.ng-class-header h3 {
+  margin: 0 0 8px;
+  color: white;
+  font-size: 25px;
+  font-weight: 800;
+}
+
+.ng-class-header p {
+  margin: 0;
+  color: rgba(255, 255, 255, .85);
+  font-size: 12px;
+}
+
+.ng-class-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 24px 20px 20px;
+}
+
+.ng-class-details {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  flex: 1;
+  margin-bottom: 28px;
+}
+
+.ng-class-detail {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.ng-class-detail svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #2563eb;
+}
+
+.ng-class-detail strong {
+  color: #1e293b;
+}
+
+.ng-class-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 15px 17px;
+  border-radius: 13px;
+  background: linear-gradient(110deg, #0ea5e9, #2563eb 55%, #1d4ed8);
+  background-size: 200% 100%;
+  color: white;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 750;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, .2);
+  transition: transform .3s ease, background-position .3s ease;
+}
+
+.ng-class-button:hover {
+  color: white;
+  background-position: 100% 50%;
+  transform: translateY(-3px);
+}
+
+.ng-class-button svg {
+  transition: transform .3s ease;
+}
+
+.ng-class-button:hover svg {
+  transform: translate(3px, -3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ng-class-card,
+  .ng-class-icon,
+  .ng-class-button,
+  .ng-class-button svg {
+    transition: none;
+  }
+}

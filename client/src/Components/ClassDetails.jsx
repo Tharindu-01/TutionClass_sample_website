@@ -1,25 +1,26 @@
 
 import { useState } from "react";
-import { Link } from "react-router";
 import { classes } from "../data/classes";
+import ClassCard from "../Components/ClassCard";
+import "./ClassDetails.css";
 
 function ClassDetails() {
   const [selectedGrade, setSelectedGrade] = useState(10);
   const [selectedSubject, setSelectedSubject] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Filter classes by grade
+  // Filter by selected grade
   const gradeClasses = classes.filter(
-    (item) => item.grade === selectedGrade
+    (item) => Number(item.grade) === selectedGrade
   );
 
-  // Get subjects for selected grade
+  // Subjects for selected grade
   const subjects = [
     "All",
     ...new Set(gradeClasses.map((item) => item.subject)),
   ];
 
-  // Filter classes by subject and search
+  // Filter by subject and search
   const filteredClasses = gradeClasses.filter((item) => {
     const matchesSubject =
       selectedSubject === "All" ||
@@ -34,14 +35,14 @@ function ClassDetails() {
     return matchesSubject && matchesSearch;
   });
 
-  // Change selected grade
+  // Change grade
   function changeGrade(grade) {
     setSelectedGrade(grade);
     setSelectedSubject("All");
     setSearchTerm("");
   }
 
-  // Reset all filters
+  // Reset filters
   function resetFilters() {
     setSelectedGrade(10);
     setSelectedSubject("All");
@@ -49,129 +50,116 @@ function ClassDetails() {
   }
 
   return (
-    <section className="classes">
-      <h2>Explore Our Classes</h2>
-      <p>Select your grade and find your classes.</p>
+  
+    <section className="classes ng-classes-section">
+    <h1 style={{ color: "red", fontSize: "40px" }}>
+      CLASS DETAILS TEST 123
+    </h1>
+      <div className="ng-classes-container">
 
-      {/* Grade Filter */}
-      <div className="filter-buttons">
-        <button
-          type="button"
-          className={selectedGrade === 10 ? "active" : ""}
-          onClick={() => changeGrade(10)}
-        >
-          Grade 10
-        </button>
+        {/* Heading */}
+        <div className="ng-classes-heading">
+          <h2>
+            Explore Our <span>Classes</span>
+          </h2>
+          <p>Select your grade and find your classes.</p>
+        </div>
 
-        <button
-          type="button"
-          className={selectedGrade === 11 ? "active" : ""}
-          onClick={() => changeGrade(11)}
-        >
-          Grade 11
-        </button>
-      </div>
+        {/* Grade Filter */}
+        <div className="filter-buttons">
+          <button
+            type="button"
+            className={selectedGrade === 10 ? "active" : ""}
+            onClick={() => changeGrade(10)}
+          >
+            Grade 10
+          </button>
 
-      {/* Subject Filter */}
-      <div className="subject-filter">
-        <label htmlFor="subject">Select Subject</label>
+          <button
+            type="button"
+            className={selectedGrade === 11 ? "active" : ""}
+            onClick={() => changeGrade(11)}
+          >
+            Grade 11
+          </button>
+        </div>
 
-        <select
-          id="subject"
-          value={selectedSubject}
-          onChange={(e) => setSelectedSubject(e.target.value)}
-        >
-          {subjects.map((subject) => (
-            <option key={subject} value={subject}>
-              {subject === "All" ? "All Subjects" : subject}
-            </option>
+        {/* Subject Filter */}
+        <div className="subject-filter">
+          <label htmlFor="subject">
+            Select Subject
+          </label>
+
+          <select
+            id="subject"
+            value={selectedSubject}
+            onChange={(e) =>
+              setSelectedSubject(e.target.value)
+            }
+          >
+            {subjects.map((subject) => (
+              <option key={subject} value={subject}>
+                {subject === "All"
+                  ? "All Subjects"
+                  : subject}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Search Bar */}
+        <div className="class-search">
+          <label htmlFor="class-search-input">
+            Search Classes
+          </label>
+
+          <input
+            id="class-search-input"
+            type="search"
+            placeholder="Search subject or teacher..."
+            value={searchTerm}
+            onChange={(e) =>
+              setSearchTerm(e.target.value)
+            }
+          />
+        </div>
+
+        {/* Results */}
+        <div className="class-results">
+          <p>
+            Showing <strong>{filteredClasses.length}</strong>{" "}
+            {filteredClasses.length === 1
+              ? "class"
+              : "classes"}
+          </p>
+
+          <button
+            type="button"
+            className="reset-button"
+            onClick={resetFilters}
+          >
+            Reset Filters
+          </button>
+        </div>
+
+        {/* Premium Blue Gradient Cards */}
+        <div className="ng-classes-grid">
+          {filteredClasses.map((item) => (
+            <ClassCard
+              key={item.id}
+              classData={item}
+            />
           ))}
-        </select>
+        </div>
+
+        {/* No Results */}
+        {filteredClasses.length === 0 && (
+          <p className="no-results">
+            No matching classes found.
+          </p>
+        )}
+
       </div>
-
-      {/* Search Bar */}
-      <div className="class-search">
-        <label htmlFor="class-search-input">
-          Search Classes
-        </label>
-
-        <input
-          id="class-search-input"
-          type="search"
-          placeholder="Search subject or teacher..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
-
-      {/* Class Count and Reset Button */}
-      <div className="class-results">
-        <p>
-          Showing <strong>{filteredClasses.length}</strong>{" "}
-          {filteredClasses.length === 1 ? "class" : "classes"}
-        </p>
-
-        <button
-          type="button"
-          className="reset-button"
-          onClick={resetFilters}
-        >
-          Reset Filters
-        </button>
-      </div>
-
-      {/* Class Cards */}
-      
-{/* Class Cards */}
-<div className="class-grid">
-  {filteredClasses.map((item) => (
-    <div className="class-card" key={item.id}>
-
-      <div className="card-header">
-        <span className="grade-badge">
-          Grade {item.grade}
-        </span>
-        <span className="card-category">
-          Subject Class
-        </span>
-      </div>
-
-      <h3>{item.subject}</h3>
-
-      <p className="card-description">
-        Learn with experienced teachers at
-        NextGen Education Academy.
-      </p>
-
-      <div className="card-info">
-        <p><strong>Teacher:</strong> {item.teacher}</p>
-        <p><strong>Day:</strong> {item.day}</p>
-        <p><strong>Time:</strong> {item.time}</p>
-        <p><strong>Hall:</strong> {item.hall}</p>
-      </div>
-
-      <span className="mode-badge">
-        {item.mode}
-      </span>
-
-      <Link
-        to={`/classes/${item.id}`}
-        className="primary-button card-button"
-      >
-        View Details →
-      </Link>
-
-    </div>
-  ))}
-</div>
-
-
-      {/* No Results Message */}
-      {filteredClasses.length === 0 && (
-        <p className="no-results">
-          No matching classes found.
-        </p>
-      )}
     </section>
   );
 }

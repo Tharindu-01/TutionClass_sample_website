@@ -1,0 +1,54 @@
+
+/* Login Welcome Panel Background */
+
+.auth-page .auth-brand {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+
+  background-image:
+    linear-gradient(
+      110deg,
+      rgba(5, 24, 60, 0.88),
+      rgba(12, 47, 105, 0.62)
+    ),
+    url("/images/login-background.jpg");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: white;
+}
+
+.auth-page .auth-brand > * {
+  position: relative;
+  z-index: 1;
+}
+
+.auth-page .auth-brand h1 {
+  color: white;
+}
+
+.auth-page .auth-brand h1 span {
+  color: #7dd3fc;
+}
+
+.auth-page .auth-brand p,
+.auth-page .auth-benefits {
+  color: #f1f5ff;
+}
+.auth-page .auth-brand {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.auth-page .auth-brand::before,
+.auth-page .auth-brand::after {
+  pointer-events: none;
+}
+
+.auth-page .auth-brand > * {
+  position: relative;
+  z-index: 1;
+}
