@@ -42,6 +42,17 @@ const studentSchema = new mongoose.Schema(
       default: "student",
       immutable: true,
     },
+
+    profilePhoto: {
+      data: {
+        type: Buffer,
+        select: false,
+      },
+      contentType: {
+        type: String,
+        select: false,
+      },
+    },
   },
   { timestamps: true }
 );

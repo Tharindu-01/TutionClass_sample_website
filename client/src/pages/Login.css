@@ -1,54 +1,446 @@
 
-/* Login Welcome Panel Background */
+/* =========================================
+   NEXTGEN ACADEMY - STUDENT LOGIN
+========================================= */
 
-.auth-page .auth-brand {
+.ng-login-page {
+  min-height: calc(100vh - 80px);
+  padding: 35px 5%;
+  background: #f8fafc;
+  font-family: "Inter", sans-serif;
+}
+
+.ng-login-page * {
+  box-sizing: border-box;
+}
+
+.ng-login-container {
+  display: grid;
+  grid-template-columns: 0.95fr 1.05fr;
+  width: 100%;
+  max-width: 1150px;
+  min-height: 640px;
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 18px 60px rgba(15,23,42,0.08);
+}
+
+/* ===== LEFT BRAND PANEL ===== */
+
+.ng-login-brand {
   position: relative;
   isolation: isolate;
+  display: flex;
   overflow: hidden;
-
-  background-image:
+  background:
     linear-gradient(
-      110deg,
-      rgba(5, 24, 60, 0.88),
-      rgba(12, 47, 105, 0.62)
+      135deg,
+      rgba(11,23,48,0.92),
+      rgba(29,78,216,0.67)
     ),
-    url("/images/login-background.jpg");
-
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+    url("/images/login-background.jpg")
+      center / cover no-repeat,
+    #0b1730;
   color: white;
 }
 
-.auth-page .auth-brand > * {
-  position: relative;
-  z-index: 1;
+.ng-login-brand-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    180deg,
+    rgba(11,23,48,0.1),
+    rgba(11,23,48,0.5)
+  );
 }
 
-.auth-page .auth-brand h1 {
+.ng-login-brand-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 42px;
+}
+
+.ng-login-brand-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  align-self: flex-start;
   color: white;
+  text-decoration: none;
 }
 
-.auth-page .auth-brand h1 span {
-  color: #7dd3fc;
+.ng-login-brand-logo img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
 }
 
-.auth-page .auth-brand p,
-.auth-page .auth-benefits {
-  color: #f1f5ff;
-}
-.auth-page .auth-brand {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
+.ng-login-brand-logo div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
-.auth-page .auth-brand::before,
-.auth-page .auth-brand::after {
-  pointer-events: none;
+.ng-login-brand-logo strong {
+  color: #ffffff;
+  font-size: 20px;
+  letter-spacing: -0.5px;
 }
 
-.auth-page .auth-brand > * {
-  position: relative;
-  z-index: 1;
+.ng-login-brand-logo span {
+  color: #bfdbfe;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+
+.ng-login-brand-main {
+  margin: auto 0;
+  padding: 65px 0;
+}
+
+.ng-login-brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 15px;
+  border: 1px solid rgba(191,219,254,0.3);
+  border-radius: 50px;
+  background: rgba(255,255,255,0.1);
+  color: #dbeafe;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.ng-login-brand-main h1 {
+  margin: 25px 0 20px;
+  color: white;
+  font-size: clamp(46px,5vw,66px);
+  font-weight: 750;
+  letter-spacing: -2.2px;
+  line-height: 1.08;
+}
+
+.ng-login-brand-main h1 span {
+  color: #60a5fa;
+}
+
+.ng-login-brand-main p {
+  max-width: 360px;
+  color: #dbeafe;
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+.ng-login-brand-feature {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 25px;
+  padding: 13px 16px;
+  border: 1px solid rgba(191,219,254,0.2);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.09);
+  color: #eff6ff;
+  font-size: 12px;
+}
+
+.ng-login-brand-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #e2e8f0;
+  font-size: 12px;
+}
+
+.ng-login-brand-bottom span {
+  color: #93c5fd;
+  font-size: 11px;
+}
+
+/* ===== RIGHT FORM PANEL ===== */
+
+.ng-login-form-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 55px 55px;
+  background: #ffffff;
+}
+
+.ng-login-form-wrapper {
+  width: 100%;
+  max-width: 390px;
+}
+
+.ng-login-eyebrow {
+  color: #2563eb;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 1.5px;
+}
+
+.ng-login-form-wrapper h2 {
+  margin: 15px 0 12px;
+  color: #0b1730;
+  font-size: 32px;
+  font-weight: 750;
+  letter-spacing: -1px;
+}
+
+.ng-login-subtitle {
+  margin: 0 0 35px;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.ng-login-field {
+  margin-bottom: 23px;
+}
+
+.ng-login-field label {
+  display: block;
+  margin-bottom: 10px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.ng-login-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 0 15px;
+  border: 1px solid #dbe3ef;
+  border-radius: 12px;
+  background: white;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.ng-login-input-wrap:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37,99,235,0.08);
+}
+
+.ng-login-input-wrap > svg {
+  flex-shrink: 0;
+  color: #94a3b8;
+}
+
+.ng-login-input-wrap input {
+  flex: 1;
+  min-width: 0;
+  height: 51px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #0b1730;
+  font: inherit;
+  font-size: 13px;
+}
+
+.ng-login-input-wrap input::placeholder {
+  color: #94a3b8;
+}
+
+.ng-login-eye-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.ng-login-eye-btn:hover {
+  color: #2563eb;
+}
+
+/* ===== ERROR MESSAGE ===== */
+
+.ng-login-error {
+  margin-bottom: 20px;
+  padding: 13px 15px;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* ===== SUBMIT BUTTON ===== */
+
+.ng-login-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px 20px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(
+    120deg,
+    #0ea5e9,
+    #2563eb
+  );
+  color: white;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.ng-login-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(37,99,235,0.25);
+}
+
+.ng-login-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* ===== REGISTER LINK ===== */
+
+.ng-login-register {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 25px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.ng-login-register a {
+  color: #2563eb;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.ng-login-register a:hover {
+  text-decoration: underline;
+}
+
+/* ===== SECURITY NOTE ===== */
+
+.ng-login-security {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 38px;
+  padding-top: 23px;
+  border-top: 1px solid #e2e8f0;
+  color: #94a3b8;
+  font-size: 11px;
+  text-align: center;
+}
+
+.ng-login-security svg {
+  flex-shrink: 0;
+  color: #2563eb;
+}
+
+.ng-login-back-home {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 22px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ng-login-back-home:hover {
+  color: #2563eb;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 900px) {
+  .ng-login-container {
+    grid-template-columns: 1fr;
+  }
+
+  .ng-login-brand {
+    min-height: 350px;
+  }
+
+  .ng-login-brand-content {
+    padding: 30px;
+  }
+
+  .ng-login-brand-main {
+    padding: 35px 0;
+  }
+
+  .ng-login-brand-main h1 {
+    font-size: 43px;
+  }
+
+  .ng-login-form-panel {
+    padding: 45px 30px;
+  }
+}
+
+@media (max-width: 500px) {
+  .ng-login-page {
+    padding: 20px 4%;
+  }
+
+  .ng-login-container {
+    border-radius: 18px;
+  }
+
+  .ng-login-brand {
+    min-height: 310px;
+  }
+
+  .ng-login-brand-content {
+    padding: 24px;
+  }
+
+  .ng-login-brand-main h1 {
+    font-size: 38px;
+  }
+
+  .ng-login-brand-main p {
+    font-size: 12px;
+  }
+
+  .ng-login-form-panel {
+    padding: 38px 22px;
+  }
+
+  .ng-login-form-wrapper h2 {
+    font-size: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ng-login-submit,
+  .ng-login-input-wrap {
+    transition: none;
+  }
 }
