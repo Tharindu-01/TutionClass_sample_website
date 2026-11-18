@@ -1,9 +1,10 @@
+import { Routes, Route, useLocation } from "react-router";
 
-import { Routes, Route } from 'react-router'
 import './App.css'
 
 import Navbar from './Components/Navbar'
 import Footer from './Components/Footer'
+import ScrollToTop from './Components/ScrollToTop'
 
 import Home from './pages/Home'
 import Classes from './pages/Classes'
@@ -11,27 +12,23 @@ import ClassInfo from './pages/ClassInfo'
 import Timetable from './pages/Timetable'
 import Contact from './pages/Contact'
 import TeacherProfile from "./pages/TeacherProfile";
-
 import Teachers from "./pages/Teachers";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import StudentDashboard from "./pages/StudentDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
-import "./App.css";
-import ScrollToTop from "./Components/ScrollToTop";
-
-
-
-
-
 
 function App() {
-  
+  const location = useLocation();
+
+  const isStudentDashboard =
+    location.pathname.startsWith("/student/dashboard");
+
   return (
     <div className="app">
       <ScrollToTop />
 
-      <Navbar />
+      {!isStudentDashboard && <Navbar />}
 
       <main>
         <Routes>
@@ -44,21 +41,14 @@ function App() {
           <Route path="/teachers/:id" element={<TeacherProfile />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
-          <Route
-            path="/student/dashboard"
-            element={<StudentDashboard />}
-          />
-          <Route
-            path="/admin/dashboard"
-            element={<AdminDashboard />}
-          />
+          <Route path="/student/dashboard" element={<StudentDashboard />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
         </Routes>
       </main>
 
-      <Footer />
+      {!isStudentDashboard && <Footer />}
     </div>
   );
 }
 
-
-export default App
+export default App;

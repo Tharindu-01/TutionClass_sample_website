@@ -5,21 +5,39 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
-// Import routes
 const authRoutes = require("./routes/authRoutes");
 const studentRoutes = require("./routes/studentRoutes");
+const studentClassRoutes = require("./routes/studentClassRoutes");
 
-// Initialize Express FIRST
 const app = express();
 
-// Middleware
+const PORT = process.env.PORT || 5000;
+
+// Allow Vite development frontend
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:5175",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:5174",
+  "http://127.0.0.1:5175",
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(
+        new Error("Not allowed by CORS")
+      );
+    },
   })
 );
 
-app.use(express.json({ limit: "20kb" }));
+app.use(express.json());
 
 // Health check
 app.get("/api/health", (req, res) => {
@@ -29,36 +47,58 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// API Routes
+// Authentication
 app.use("/api/auth", authRoutes);
+
+// Student profile and profile photo
 app.use("/api/student", studentRoutes);
 
-// Server configuration
-const PORT = process.env.PORT || 5000;
+// Student enrolled classes and timetable
+app.use("/api/student", studentClassRoutes);
 
-// Connect MongoDB and start server
-async function startServer() {
+// API 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `API route not found: ${req.method} ${req.originalUrl}`,
+  });
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error("SERVER ERROR:", err);
+
+  res.status(500).json({
+    success: false,
+    message: "Internal server error",
+  });
+});
+
+// MongoDB connection
+const startServer = async () => {
   try {
     if (!process.env.MONGO_URI) {
-      throw new Error("MONGO_URI is missing");
-    }
-
-    if (!process.env.JWT_SECRET) {
-      throw new Error("JWT_SECRET is missing");
+      throw new Error("MONGO_URI is missing in .env");
     }
 
     await mongoose.connect(process.env.MONGO_URI);
 
-    console.log("MongoDB connected successfully");
+    console.log("MongoDB Connected");
     console.log("Database:", mongoose.connection.name);
 
     app.listen(PORT, () => {
-      console.log(`NextGen API running on port ${PORT}`);
+      console.log(
+        `NextGen API running on port ${PORT}`
+      );
     });
   } catch (error) {
-    console.error("Server error:", error.message);
+    console.error(
+      "Server startup failed:",
+      error.message
+    );
+
     process.exit(1);
   }
-}
+};
 
 startServer();

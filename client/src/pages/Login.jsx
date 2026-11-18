@@ -14,8 +14,8 @@ import {
 
 import "./Login.css";
 
-const API_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000";
+// Local development API
+const API_URL = "http://localhost:5000";
 
 function Login() {
   const navigate = useNavigate();
@@ -29,29 +29,38 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
 
+    if (loading) return;
+
     setError("");
     setLoading(true);
 
+    const loginURL = `${API_URL}/api/auth/login`;
+
     try {
-      const response = await fetch(
-        `${API_URL}/api/auth/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: email.trim(),
-            password,
-          }),
-        }
+      console.log("Login API URL:", loginURL);
+
+      const response = await fetch(loginURL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          password,
+        }),
+      });
+
+      console.log(
+        "Login HTTP Status:",
+        response.status
       );
 
       const data = await response.json();
 
       if (!response.ok) {
         throw new Error(
-          data.message || "Login failed. Please try again."
+          data.message ||
+          "Login failed. Please try again."
         );
       }
 
@@ -66,15 +75,28 @@ function Login() {
         data.token
       );
 
+      console.log("Login successful");
+
       navigate("/student/dashboard", {
         replace: true,
       });
     } catch (err) {
-      setError(
-        err.message === "Failed to fetch"
-          ? "Cannot connect to the server. Please try again."
-          : err.message
-      );
+      console.error("Login Error:", err);
+
+      if (err instanceof TypeError) {
+        setError(
+          "Cannot connect to the server. Please check the browser console."
+        );
+      } else if (err instanceof SyntaxError) {
+        setError(
+          "Invalid response from the server."
+        );
+      } else {
+        setError(
+          err.message ||
+          "Something went wrong. Please try again."
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -84,11 +106,12 @@ function Login() {
     <main className="ng-login-page">
       <div className="ng-login-container">
 
-        {/* ===== LEFT BRAND PANEL ===== */}
+        {/* LEFT BRAND PANEL */}
         <aside className="ng-login-brand">
           <div className="ng-login-brand-overlay" />
 
           <div className="ng-login-brand-content">
+
             <Link
               to="/"
               className="ng-login-brand-logo"
@@ -105,6 +128,7 @@ function Login() {
             </Link>
 
             <div className="ng-login-brand-main">
+
               <span className="ng-login-brand-badge">
                 <GraduationCap size={16} />
                 STUDENT PORTAL
@@ -129,16 +153,18 @@ function Login() {
                   Learn smarter. Achieve more.
                 </span>
               </div>
+
             </div>
 
             <div className="ng-login-brand-bottom">
               NextGen Education Academy
               <span>Learn. Grow. Succeed.</span>
             </div>
+
           </div>
         </aside>
 
-        {/* ===== RIGHT LOGIN PANEL ===== */}
+        {/* RIGHT LOGIN PANEL */}
         <section className="ng-login-form-panel">
           <div className="ng-login-form-wrapper">
 
@@ -174,6 +200,7 @@ function Login() {
                     }
                     autoComplete="email"
                     required
+                    disabled={loading}
                   />
                 </div>
               </div>
@@ -190,7 +217,9 @@ function Login() {
                   <input
                     id="login-password"
                     type={
-                      showPassword ? "text" : "password"
+                      showPassword
+                        ? "text"
+                        : "password"
                     }
                     placeholder="Enter your password"
                     value={password}
@@ -199,6 +228,7 @@ function Login() {
                     }
                     autoComplete="current-password"
                     required
+                    disabled={loading}
                   />
 
                   <button
@@ -212,6 +242,7 @@ function Login() {
                         ? "Hide password"
                         : "Show password"
                     }
+                    disabled={loading}
                   >
                     {showPassword ? (
                       <EyeOff size={19} />
@@ -247,6 +278,7 @@ function Login() {
                 )}
               </button>
 
+              {/* REGISTER LINK */}
               <div className="ng-login-register">
                 Don't have an account?
                 <Link to="/register">
@@ -256,6 +288,7 @@ function Login() {
 
             </form>
 
+            {/* SECURITY */}
             <div className="ng-login-security">
               <ShieldCheck size={17} />
               <span>
@@ -264,6 +297,7 @@ function Login() {
               </span>
             </div>
 
+            {/* BACK HOME */}
             <Link
               to="/"
               className="ng-login-back-home"
@@ -274,6 +308,7 @@ function Login() {
 
           </div>
         </section>
+
       </div>
     </main>
   );

@@ -15,7 +15,6 @@ import {
   LogOut,
   ArrowUpRight,
   CheckCircle2,
-  ShieldCheck,
   Sparkles,
   Clock3,
   Menu,
@@ -23,29 +22,32 @@ import {
   ChevronRight,
   ImagePlus,
   AlertCircle,
+  MapPin,
+  Monitor,
+  Users,
+  CalendarClock,
+  ArrowRight,
 } from "lucide-react";
 
 import "./StudentDashboard.css";
 
 const API_URL =
-  import.meta.env.VITE_API_URL ||
-  "http://localhost:5000";
+  import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const getToken = () =>
   sessionStorage.getItem("studentToken");
 
 async function apiRequest(path, options = {}) {
-  const token = getToken();
-
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
       ...options.headers,
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${getToken()}`,
     },
   });
 
   const type = response.headers.get("content-type");
+
   const data = type?.includes("application/json")
     ? await response.json()
     : {};
@@ -74,11 +76,22 @@ function StudentDashboard() {
   const [notice, setNotice] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const logout = () => {
+  const [myClasses, setMyClasses] = useState([]);
+  const [myTimetable, setMyTimetable] = useState([]);
+  const [academicLoading, setAcademicLoading] = useState(true);
+  const [academicError, setAcademicError] = useState("");
+
+  // LOGOUT FUNCTION
+  const handleLogout = () => {
     sessionStorage.removeItem("studentToken");
-    navigate("/login", { replace: true });
+    setMenuOpen(false);
+
+    navigate("/login", {
+      replace: true,
+    });
   };
 
+  // Load student profile
   useEffect(() => {
     const token = getToken();
 
@@ -92,15 +105,16 @@ function StudentDashboard() {
 
     async function loadDashboard() {
       try {
-        const data = await apiRequest("/api/student/me", {
-          signal: controller.signal,
-        });
+        const data = await apiRequest(
+          "/api/student/me",
+          { signal: controller.signal }
+        );
 
         if (controller.signal.aborted) return;
 
         setStudent(data.student);
 
-        if (data.student.hasPhoto) {
+        if (data.student?.hasPhoto) {
           const response = await fetch(
             `${API_URL}/api/student/me/photo`,
             {
@@ -123,10 +137,8 @@ function StudentDashboard() {
       } catch (err) {
         if (err.name === "AbortError") return;
 
-        if (err.status === 401 ||
-            err.status === 403) {
-          sessionStorage.removeItem("studentToken");
-          navigate("/login", { replace: true });
+        if (err.status === 401 || err.status === 403) {
+          handleLogout();
           return;
         }
 
@@ -142,12 +154,62 @@ function StudentDashboard() {
 
     return () => {
       controller.abort();
+
       if (currentPhotoUrl) {
         URL.revokeObjectURL(currentPhotoUrl);
       }
     };
   }, [navigate]);
 
+  // Load enrolled classes and timetable
+  useEffect(() => {
+    const token = getToken();
+
+    if (!token) return;
+
+    const controller = new AbortController();
+
+    async function loadAcademicData() {
+      try {
+        setAcademicLoading(true);
+        setAcademicError("");
+
+        const [classesData, timetableData] =
+          await Promise.all([
+            apiRequest("/api/student/my-classes", {
+              signal: controller.signal,
+            }),
+            apiRequest("/api/student/my-timetable", {
+              signal: controller.signal,
+            }),
+          ]);
+
+        if (controller.signal.aborted) return;
+
+        setMyClasses(classesData.classes || []);
+        setMyTimetable(timetableData.timetable || []);
+      } catch (err) {
+        if (err.name === "AbortError") return;
+
+        if (err.status === 401 || err.status === 403) {
+          handleLogout();
+          return;
+        }
+
+        setAcademicError(err.message);
+      } finally {
+        if (!controller.signal.aborted) {
+          setAcademicLoading(false);
+        }
+      }
+    }
+
+    loadAcademicData();
+
+    return () => controller.abort();
+  }, []);
+
+  // Upload profile photo
   const handlePhotoUpload = async (event) => {
     const file = event.target.files?.[0];
     event.target.value = "";
@@ -211,16 +273,13 @@ function StudentDashboard() {
 
       setNotice("Profile photo updated successfully!");
     } catch (err) {
-      if (err.status === 401 || err.status === 403) {
-        logout();
-        return;
-      }
       setNotice(err.message);
     } finally {
       setUploading(false);
     }
   };
 
+  // Remove profile photo
   const handleRemovePhoto = async () => {
     setRemoving(true);
     setNotice("");
@@ -242,16 +301,13 @@ function StudentDashboard() {
 
       setNotice("Profile photo removed.");
     } catch (err) {
-      if (err.status === 401 || err.status === 403) {
-        logout();
-        return;
-      }
       setNotice(err.message);
     } finally {
       setRemoving(false);
     }
   };
 
+  // Loading screen
   if (loading) {
     return (
       <div className="sd-loading">
@@ -262,12 +318,14 @@ function StudentDashboard() {
     );
   }
 
+  // Error screen
   if (error) {
     return (
       <div className="sd-loading">
         <AlertCircle size={40} />
         <h2>Unable to load dashboard</h2>
         <p>{error}</p>
+
         <button
           className="sd-primary-button"
           onClick={() => window.location.reload()}
@@ -281,6 +339,7 @@ function StudentDashboard() {
   if (!student) return null;
 
   const firstName = student.name.split(" ")[0];
+
   const initials = student.name
     .split(" ")
     .slice(0, 2)
@@ -288,7 +347,6 @@ function StudentDashboard() {
     .join("")
     .toUpperCase();
 
-  // Real profile completion based on available fields
   const profileFields = [
     Boolean(student.name),
     Boolean(student.email),
@@ -297,8 +355,7 @@ function StudentDashboard() {
     Boolean(student.hasPhoto),
   ];
 
-  const completedFields =
-    profileFields.filter(Boolean).length;
+  const completedFields = profileFields.filter(Boolean).length;
 
   const profileCompletion = Math.round(
     (completedFields / profileFields.length) * 100
@@ -316,14 +373,18 @@ function StudentDashboard() {
     : "Not available";
 
   const profilePhoto = photoUrl ? (
-    <img src={photoUrl} alt={`${student.name} profile`} />
+    <img
+      src={photoUrl}
+      alt={`${student.name} profile`}
+    />
   ) : (
     <span>{initials}</span>
   );
 
   return (
     <div className="sd-layout">
-      {/* MOBILE MENU */}
+
+      {/* MOBILE NAVBAR */}
       <div className="sd-mobile-bar">
         <span>
           <GraduationCap size={23} />
@@ -372,26 +433,32 @@ function StudentDashboard() {
             MAIN MENU
           </span>
 
-          <div className="sd-nav-item sd-nav-active">
+          <a
+            href="#overview"
+            className="sd-nav-item sd-nav-active"
+            onClick={() => setMenuOpen(false)}
+          >
             <LayoutDashboard size={19} />
             <span>Overview</span>
-          </div>
+          </a>
 
-          <Link
-            to="/classes"
+          <a
+            href="#my-classes"
             className="sd-nav-item"
+            onClick={() => setMenuOpen(false)}
           >
             <BookOpen size={19} />
-            <span>Explore Classes</span>
-          </Link>
+            <span>My Classes</span>
+          </a>
 
-          <Link
-            to="/timetable"
+          <a
+            href="#my-timetable"
             className="sd-nav-item"
+            onClick={() => setMenuOpen(false)}
           >
             <CalendarDays size={19} />
-            <span>Timetable</span>
-          </Link>
+            <span>My Timetable</span>
+          </a>
 
           <a
             href="#my-profile"
@@ -401,6 +468,15 @@ function StudentDashboard() {
             <UserRound size={19} />
             <span>My Profile</span>
           </a>
+
+          <Link
+            to="/classes"
+            className="sd-nav-item"
+            onClick={() => setMenuOpen(false)}
+          >
+            <GraduationCap size={19} />
+            <span>Explore Classes</span>
+          </Link>
         </div>
 
         <div className="sd-sidebar-bottom">
@@ -413,6 +489,7 @@ function StudentDashboard() {
             </p>
           </div>
 
+          {/* STUDENT PROFILE AND LOGOUT */}
           <div className="sd-sidebar-user">
             <div className="sd-small-avatar">
               {profilePhoto}
@@ -424,7 +501,8 @@ function StudentDashboard() {
             </div>
 
             <button
-              onClick={logout}
+              type="button"
+              onClick={handleLogout}
               title="Logout"
               aria-label="Logout"
             >
@@ -435,7 +513,9 @@ function StudentDashboard() {
       </aside>
 
       {/* MAIN CONTENT */}
-      <main className="sd-main">
+      <main className="sd-main" id="overview">
+
+        {/* TOP BAR */}
         <div className="sd-topbar">
           <div>
             <span className="sd-overline">
@@ -456,7 +536,7 @@ function StudentDashboard() {
           </div>
         </div>
 
-        {/* WELCOME BANNER */}
+        {/* WELCOME */}
         <section className="sd-welcome">
           <div className="sd-welcome-content">
             <span className="sd-welcome-badge">
@@ -471,17 +551,18 @@ function StudentDashboard() {
 
             <p>
               Welcome to your personal learning
-              dashboard. Keep exploring,
-              learning and growing with NextGen.
+              dashboard. Manage your classes,
+              timetable and academic journey
+              with NextGen.
             </p>
 
-            <Link
-              to="/classes"
+            <a
+              href="#my-classes"
               className="sd-welcome-button"
             >
-              Explore Classes
+              View My Classes
               <ArrowUpRight size={18} />
-            </Link>
+            </a>
           </div>
 
           <div
@@ -490,12 +571,15 @@ function StudentDashboard() {
           >
             <div className="sd-art-circle sd-art-one" />
             <div className="sd-art-circle sd-art-two" />
+
             <div className="sd-art-main">
               <GraduationCap size={76} />
             </div>
+
             <div className="sd-art-float sd-art-book">
               <BookOpen size={26} />
             </div>
+
             <div className="sd-art-float sd-art-star">
               <Sparkles size={25} />
             </div>
@@ -506,7 +590,7 @@ function StudentDashboard() {
         <div className="sd-section-heading">
           <div>
             <span className="sd-overline">
-              ACCOUNT SNAPSHOT
+              ACADEMIC SNAPSHOT
             </span>
             <h2>My Statistics</h2>
           </div>
@@ -515,48 +599,218 @@ function StudentDashboard() {
         <section className="sd-stats">
           <div className="sd-stat-card">
             <div className="sd-stat-icon sd-icon-blue">
+              <BookOpen size={24} />
+            </div>
+
+            <span>Enrolled Classes</span>
+
+            <strong>
+              {academicLoading ? "..." : myClasses.length}
+            </strong>
+
+            <small>Active classes</small>
+          </div>
+
+          <div className="sd-stat-card">
+            <div className="sd-stat-icon sd-icon-purple">
+              <CalendarDays size={24} />
+            </div>
+
+            <span>Weekly Sessions</span>
+
+            <strong>
+              {academicLoading ? "..." : myTimetable.length}
+            </strong>
+
+            <small>Scheduled lessons</small>
+          </div>
+
+          <div className="sd-stat-card">
+            <div className="sd-stat-icon sd-icon-green">
               <GraduationCap size={24} />
             </div>
+
             <span>Current Grade</span>
             <strong>{student.grade}</strong>
             <small>Academic level</small>
           </div>
 
           <div className="sd-stat-card">
-            <div className="sd-stat-icon sd-icon-purple">
-              <Hash size={24} />
-            </div>
-            <span>Registration ID</span>
-            <strong className="sd-stat-reg">
-              {student.registrationNumber}
-            </strong>
-            <small>Academy student ID</small>
-          </div>
-
-          <div className="sd-stat-card">
-            <div className="sd-stat-icon sd-icon-green">
-              <ShieldCheck size={24} />
-            </div>
-            <span>Account Status</span>
-            <strong>Active</strong>
-            <small>Registered student</small>
-          </div>
-
-          <div className="sd-stat-card">
             <div className="sd-stat-icon sd-icon-orange">
               <CheckCircle2 size={24} />
             </div>
+
             <span>Profile Complete</span>
             <strong>{profileCompletion}%</strong>
+
             <small>
-              {completedFields} of 5 profile fields
+              {completedFields} of 5 fields
             </small>
           </div>
         </section>
 
-        {/* MAIN GRID */}
+        {/* MY CLASSES */}
+        <section
+          className="sd-academic-section"
+          id="my-classes"
+        >
+          <div className="sd-section-heading">
+            <div>
+              <span className="sd-overline">
+                MY LEARNING
+              </span>
+              <h2>My Enrolled Classes</h2>
+            </div>
+
+            <span className="sd-class-count">
+              {myClasses.length} Classes
+            </span>
+          </div>
+
+          {academicLoading ? (
+            <div className="sd-academic-empty">
+              Loading your classes...
+            </div>
+          ) : academicError ? (
+            <div className="sd-academic-empty">
+              <AlertCircle size={30} />
+              {academicError}
+            </div>
+          ) : myClasses.length === 0 ? (
+            <div className="sd-academic-empty">
+              <BookOpen size={35} />
+              <h3>No enrolled classes yet</h3>
+              <p>
+                Your classes will appear here
+                once the academy assigns them.
+              </p>
+            </div>
+          ) : (
+            <div className="sd-enrolled-grid">
+              {myClasses.map((classItem) => (
+                <div
+                  className="sd-enrolled-card"
+                  key={classItem._id}
+                >
+                  <div className="sd-enrolled-top">
+                    <div className="sd-enrolled-icon">
+                      <BookOpen size={25} />
+                    </div>
+
+                    <span className="sd-grade-tag">
+                      Grade {classItem.grade}
+                    </span>
+                  </div>
+
+                  <h3>{classItem.subject}</h3>
+
+                  <p className="sd-enrolled-teacher">
+                    <Users size={15} />
+                    {classItem.teacherName}
+                  </p>
+
+                  <div className="sd-enrolled-details">
+                    <span>
+                      <MapPin size={15} />
+                      {classItem.mode === "Online"
+                        ? "Online Class"
+                        : classItem.hallNumber ||
+                          "Hall not assigned"}
+                    </span>
+
+                    <span>
+                      <CalendarClock size={15} />
+                      {classItem.schedule?.[0]
+                        ? `${classItem.schedule[0].day} • ${classItem.schedule[0].startTime}`
+                        : "Schedule pending"}
+                    </span>
+                  </div>
+
+                  <div className="sd-enrolled-bottom">
+                    <span>{classItem.classCode}</span>
+
+                    <a href="#my-timetable">
+                      View Timetable
+                      <ArrowRight size={16} />
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* MY TIMETABLE */}
+        <section
+          className="sd-academic-section"
+          id="my-timetable"
+        >
+          <div className="sd-section-heading">
+            <div>
+              <span className="sd-overline">
+                WEEKLY SCHEDULE
+              </span>
+              <h2>My Class Timetable</h2>
+            </div>
+          </div>
+
+          {academicLoading ? (
+            <div className="sd-academic-empty">
+              Loading timetable...
+            </div>
+          ) : academicError ? (
+            <div className="sd-academic-empty">
+              {academicError}
+            </div>
+          ) : myTimetable.length === 0 ? (
+            <div className="sd-academic-empty">
+              <CalendarDays size={35} />
+              <h3>No timetable available</h3>
+              <p>
+                Your class timetable will appear here.
+              </p>
+            </div>
+          ) : (
+            <div className="sd-timetable-list">
+              {myTimetable.map((item, index) => (
+                <div
+                  className="sd-timetable-item"
+                  key={`${item.classId}-${item.day}-${item.startTime}-${index}`}
+                >
+                  <div className="sd-timetable-day">
+                    <CalendarDays size={19} />
+                    <strong>{item.day}</strong>
+                  </div>
+
+                  <div className="sd-timetable-info">
+                    <h3>{item.subject}</h3>
+                    <p>{item.teacherName}</p>
+                  </div>
+
+                  <div className="sd-timetable-time">
+                    <CalendarClock size={16} />
+                    {item.startTime} - {item.endTime}
+                  </div>
+
+                  <span className="sd-timetable-mode">
+                    {item.mode === "Online" ? (
+                      <Monitor size={15} />
+                    ) : (
+                      <MapPin size={15} />
+                    )}
+
+                    {item.mode === "Online"
+                      ? "Online"
+                      : item.hallNumber || "Physical"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* PROFILE AND PROGRESS */}
         <div className="sd-content-grid">
-          {/* PROFILE CARD */}
           <section
             className="sd-card sd-profile-card"
             id="my-profile"
@@ -564,10 +818,9 @@ function StudentDashboard() {
             <div className="sd-card-header">
               <div>
                 <h3>My Profile</h3>
-                <p>
-                  Manage your student identity
-                </p>
+                <p>Manage your student identity</p>
               </div>
+
               <div className="sd-header-icon">
                 <UserRound size={19} />
               </div>
@@ -583,7 +836,6 @@ function StudentDashboard() {
                     fileInputRef.current?.click()
                   }
                   disabled={uploading}
-                  title="Change profile photo"
                   aria-label="Change profile photo"
                 >
                   <Camera size={17} />
@@ -592,10 +844,12 @@ function StudentDashboard() {
 
               <div className="sd-profile-identity">
                 <h3>{student.name}</h3>
+
                 <span>
                   <GraduationCap size={14} />
                   Grade {student.grade} Student
                 </span>
+
                 <small>
                   {student.registrationNumber}
                 </small>
@@ -612,21 +866,14 @@ function StudentDashboard() {
 
             <div className="sd-photo-actions">
               <button
+                className="sd-upload-button"
                 onClick={() =>
                   fileInputRef.current?.click()
                 }
                 disabled={uploading || removing}
-                className="sd-upload-button"
               >
-                {uploading ? (
-                  <span className="sd-mini-spinner" />
-                ) : (
-                  <Upload size={16} />
-                )}
-
-                {uploading
-                  ? "Uploading..."
-                  : "Upload Photo"}
+                <Upload size={16} />
+                {uploading ? "Uploading..." : "Upload Photo"}
               </button>
 
               {student.hasPhoto && (
@@ -647,7 +894,7 @@ function StudentDashboard() {
             </p>
 
             {notice && (
-              <p className="sd-notice" role="status">
+              <p className="sd-notice">
                 {notice}
               </p>
             )}
@@ -655,6 +902,7 @@ function StudentDashboard() {
             <div className="sd-profile-details">
               <div className="sd-detail-row">
                 <Mail size={18} />
+
                 <div>
                   <span>Email Address</span>
                   <strong>{student.email}</strong>
@@ -663,6 +911,7 @@ function StudentDashboard() {
 
               <div className="sd-detail-row">
                 <Hash size={18} />
+
                 <div>
                   <span>Registration Number</span>
                   <strong>
@@ -673,6 +922,7 @@ function StudentDashboard() {
 
               <div className="sd-detail-row">
                 <Clock3 size={18} />
+
                 <div>
                   <span>Member Since</span>
                   <strong>{joinedDate}</strong>
@@ -681,15 +931,13 @@ function StudentDashboard() {
             </div>
           </section>
 
-          {/* PROGRESS CARD */}
           <section className="sd-card sd-progress-card">
             <div className="sd-card-header">
               <div>
                 <h3>Profile Progress</h3>
-                <p>
-                  Your account setup overview
-                </p>
+                <p>Your account setup overview</p>
               </div>
+
               <div className="sd-header-icon">
                 <CheckCircle2 size={19} />
               </div>
@@ -701,16 +949,9 @@ function StudentDashboard() {
                 style={{
                   "--progress": `${profileCompletion}%`,
                 }}
-                role="progressbar"
-                aria-valuenow={profileCompletion}
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-label="Profile completion"
               >
                 <div className="sd-progress-inner">
-                  <strong>
-                    {profileCompletion}%
-                  </strong>
+                  <strong>{profileCompletion}%</strong>
                   <span>Completed</span>
                 </div>
               </div>
@@ -735,11 +976,11 @@ function StudentDashboard() {
                 ) : (
                   <Camera size={17} />
                 )}
+
                 Profile picture
+
                 <span>
-                  {student.hasPhoto
-                    ? "Done"
-                    : "Pending"}
+                  {student.hasPhoto ? "Done" : "Pending"}
                 </span>
               </div>
             </div>
@@ -769,26 +1010,27 @@ function StudentDashboard() {
         </div>
 
         <section className="sd-quick-grid">
-          <Link to="/classes" className="sd-quick-card">
+          <a
+            href="#my-classes"
+            className="sd-quick-card"
+          >
             <div className="sd-quick-icon sd-icon-blue">
               <BookOpen size={25} />
             </div>
 
             <div>
-              <h3>Explore Classes</h3>
-              <p>
-                Discover subjects and teachers
-              </p>
+              <h3>My Classes</h3>
+              <p>View your enrolled subjects</p>
             </div>
 
             <ArrowUpRight
               className="sd-quick-arrow"
               size={19}
             />
-          </Link>
+          </a>
 
-          <Link
-            to="/timetable"
+          <a
+            href="#my-timetable"
             className="sd-quick-card"
           >
             <div className="sd-quick-icon sd-icon-purple">
@@ -796,27 +1038,26 @@ function StudentDashboard() {
             </div>
 
             <div>
-              <h3>Class Timetable</h3>
-              <p>
-                Check class days and times
-              </p>
+              <h3>My Timetable</h3>
+              <p>View your weekly schedule</p>
             </div>
 
             <ArrowUpRight
               className="sd-quick-arrow"
               size={19}
             />
-          </Link>
+          </a>
         </section>
 
+        {/* DASHBOARD FOOTER */}
         <footer className="sd-footer">
           <span>
             © {new Date().getFullYear()} NextGen Education Academy
           </span>
-          <span>
-            Learn • Grow • Succeed
-          </span>
+
+          <span>Learn • Grow • Succeed</span>
         </footer>
+
       </main>
     </div>
   );
