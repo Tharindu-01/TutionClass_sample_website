@@ -27,6 +27,9 @@ import {
   Users,
   CalendarClock,
   ArrowRight,
+  Pencil,
+  Save,
+  XCircle,
 } from "lucide-react";
 
 import "./StudentDashboard.css";
@@ -56,6 +59,7 @@ async function apiRequest(path, options = {}) {
     const error = new Error(
       data.message || "Something went wrong"
     );
+
     error.status = response.status;
     throw error;
   }
@@ -69,19 +73,31 @@ function StudentDashboard() {
 
   const [student, setStudent] = useState(null);
   const [photoUrl, setPhotoUrl] = useState("");
+
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [removing, setRemoving] = useState(false);
+
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
 
   const [myClasses, setMyClasses] = useState([]);
   const [myTimetable, setMyTimetable] = useState([]);
+
   const [academicLoading, setAcademicLoading] = useState(true);
   const [academicError, setAcademicError] = useState("");
 
-  // LOGOUT FUNCTION
+  const [activeSection, setActiveSection] = useState("overview");
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+
+  const [profileForm, setProfileForm] = useState({
+    name: "",
+    email: "",
+  });
+
+  // LOGOUT
   const handleLogout = () => {
     sessionStorage.removeItem("studentToken");
     setMenuOpen(false);
@@ -91,7 +107,7 @@ function StudentDashboard() {
     });
   };
 
-  // Load student profile
+  // LOAD STUDENT PROFILE
   useEffect(() => {
     const token = getToken();
 
@@ -113,6 +129,11 @@ function StudentDashboard() {
         if (controller.signal.aborted) return;
 
         setStudent(data.student);
+
+        setProfileForm({
+          name: data.student.name || "",
+          email: data.student.email || "",
+        });
 
         if (data.student?.hasPhoto) {
           const response = await fetch(
@@ -161,7 +182,7 @@ function StudentDashboard() {
     };
   }, [navigate]);
 
-  // Load enrolled classes and timetable
+  // LOAD CLASSES AND TIMETABLE
   useEffect(() => {
     const token = getToken();
 
@@ -209,9 +230,89 @@ function StudentDashboard() {
     return () => controller.abort();
   }, []);
 
-  // Upload profile photo
+  // OPEN MY PROFILE
+  const openMyProfile = () => {
+    setActiveSection("profile");
+    setEditingProfile(false);
+    setNotice("");
+
+    setProfileForm({
+      name: student?.name || "",
+      email: student?.email || "",
+    });
+
+    setMenuOpen(false);
+  };
+
+  // OPEN OVERVIEW
+  const openOverview = () => {
+    setActiveSection("overview");
+    setEditingProfile(false);
+    setNotice("");
+    setMenuOpen(false);
+  };
+
+  // PROFILE EDIT
+  const handleProfileSave = async (event) => {
+    event.preventDefault();
+
+    if (!profileForm.name.trim() || !profileForm.email.trim()) {
+      setNotice("Please enter your name and email.");
+      return;
+    }
+
+    setSavingProfile(true);
+    setNotice("");
+
+    try {
+      const data = await apiRequest("/api/student/me", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: profileForm.name.trim(),
+          email: profileForm.email.trim(),
+        }),
+      });
+
+      setStudent(data.student);
+
+      setProfileForm({
+        name: data.student.name,
+        email: data.student.email,
+      });
+
+      setEditingProfile(false);
+      setNotice("Profile updated successfully!");
+    } catch (err) {
+      if (err.status === 401 || err.status === 403) {
+        handleLogout();
+        return;
+      }
+
+      setNotice(err.message);
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  // CANCEL PROFILE EDIT
+  const handleCancelEdit = () => {
+    setEditingProfile(false);
+
+    setProfileForm({
+      name: student.name || "",
+      email: student.email || "",
+    });
+
+    setNotice("");
+  };
+
+  // UPLOAD PROFILE PHOTO
   const handlePhotoUpload = async (event) => {
     const file = event.target.files?.[0];
+
     event.target.value = "";
 
     if (!file) return;
@@ -237,6 +338,7 @@ function StudentDashboard() {
 
     try {
       const formData = new FormData();
+
       formData.append("photo", file);
 
       await apiRequest("/api/student/me/photo", {
@@ -279,7 +381,7 @@ function StudentDashboard() {
     }
   };
 
-  // Remove profile photo
+  // REMOVE PROFILE PHOTO
   const handleRemovePhoto = async () => {
     setRemoving(true);
     setNotice("");
@@ -307,7 +409,7 @@ function StudentDashboard() {
     }
   };
 
-  // Loading screen
+  // LOADING
   if (loading) {
     return (
       <div className="sd-loading">
@@ -318,7 +420,7 @@ function StudentDashboard() {
     );
   }
 
-  // Error screen
+  // ERROR
   if (error) {
     return (
       <div className="sd-loading">
@@ -338,9 +440,9 @@ function StudentDashboard() {
 
   if (!student) return null;
 
-  const firstName = student.name.split(" ")[0];
+  const firstName = student.name?.split(" ")[0] || "Student";
 
-  const initials = student.name
+  const initials = (student.name || "Student")
     .split(" ")
     .slice(0, 2)
     .map((part) => part[0])
@@ -361,22 +463,16 @@ function StudentDashboard() {
     (completedFields / profileFields.length) * 100
   );
 
-  const joinedDate = student.joinedAt
-    ? new Date(student.joinedAt).toLocaleDateString(
-        "en-GB",
-        {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        }
-      )
+  const joinedDate = student.createdAt
+    ? new Date(student.createdAt).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })
     : "Not available";
 
   const profilePhoto = photoUrl ? (
-    <img
-      src={photoUrl}
-      alt={`${student.name} profile`}
-    />
+    <img src={photoUrl} alt={`${student.name} profile`} />
   ) : (
     <span>{initials}</span>
   );
@@ -392,6 +488,7 @@ function StudentDashboard() {
         </span>
 
         <button
+          type="button"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle dashboard menu"
         >
@@ -401,6 +498,7 @@ function StudentDashboard() {
 
       {menuOpen && (
         <button
+          type="button"
           className="sd-mobile-overlay"
           aria-label="Close menu"
           onClick={() => setMenuOpen(false)}
@@ -433,41 +531,59 @@ function StudentDashboard() {
             MAIN MENU
           </span>
 
-          <a
-            href="#overview"
-            className="sd-nav-item sd-nav-active"
-            onClick={() => setMenuOpen(false)}
+          <button
+            type="button"
+            className={`sd-nav-item ${
+              activeSection === "overview" ? "sd-nav-active" : ""
+            }`}
+            onClick={openOverview}
           >
             <LayoutDashboard size={19} />
             <span>Overview</span>
-          </a>
+          </button>
 
-          <a
-            href="#my-classes"
+          <button
+            type="button"
             className="sd-nav-item"
-            onClick={() => setMenuOpen(false)}
+            onClick={() => {
+              openOverview();
+              setTimeout(() => {
+                document.getElementById("my-classes")?.scrollIntoView({
+                  behavior: "smooth",
+                });
+              }, 0);
+            }}
           >
             <BookOpen size={19} />
             <span>My Classes</span>
-          </a>
+          </button>
 
-          <a
-            href="#my-timetable"
+          <button
+            type="button"
             className="sd-nav-item"
-            onClick={() => setMenuOpen(false)}
+            onClick={() => {
+              openOverview();
+              setTimeout(() => {
+                document.getElementById("my-timetable")?.scrollIntoView({
+                  behavior: "smooth",
+                });
+              }, 0);
+            }}
           >
             <CalendarDays size={19} />
             <span>My Timetable</span>
-          </a>
+          </button>
 
-          <a
-            href="#my-profile"
-            className="sd-nav-item"
-            onClick={() => setMenuOpen(false)}
+          <button
+            type="button"
+            className={`sd-nav-item ${
+              activeSection === "profile" ? "sd-nav-active" : ""
+            }`}
+            onClick={openMyProfile}
           >
             <UserRound size={19} />
             <span>My Profile</span>
-          </a>
+          </button>
 
           <Link
             to="/classes"
@@ -489,7 +605,6 @@ function StudentDashboard() {
             </p>
           </div>
 
-          {/* STUDENT PROFILE AND LOGOUT */}
           <div className="sd-sidebar-user">
             <div className="sd-small-avatar">
               {profilePhoto}
@@ -512,8 +627,8 @@ function StudentDashboard() {
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
-      <main className="sd-main" id="overview">
+      {/* MAIN */}
+      <main className="sd-main">
 
         {/* TOP BAR */}
         <div className="sd-topbar">
@@ -521,7 +636,12 @@ function StudentDashboard() {
             <span className="sd-overline">
               STUDENT WORKSPACE
             </span>
-            <h2>Dashboard Overview</h2>
+
+            <h2>
+              {activeSection === "overview"
+                ? "Dashboard Overview"
+                : "My Profile"}
+            </h2>
           </div>
 
           <div className="sd-topbar-right">
@@ -536,528 +656,617 @@ function StudentDashboard() {
           </div>
         </div>
 
-        {/* WELCOME */}
-        <section className="sd-welcome">
-          <div className="sd-welcome-content">
-            <span className="sd-welcome-badge">
-              <Sparkles size={15} />
-              YOUR LEARNING SPACE
-            </span>
+        {/* OVERVIEW PAGE */}
+        {activeSection === "overview" && (
+          <>
 
-            <h1>
-              Hello, {firstName}
-              <span className="sd-wave"> 👋</span>
-            </h1>
+            {/* WELCOME */}
+            <section className="sd-welcome">
+              <div className="sd-welcome-content">
+                <span className="sd-welcome-badge">
+                  <Sparkles size={15} />
+                  YOUR LEARNING SPACE
+                </span>
 
-            <p>
-              Welcome to your personal learning
-              dashboard. Manage your classes,
-              timetable and academic journey
-              with NextGen.
-            </p>
+                <h1>
+                  Hello, {firstName}
+                  <span className="sd-wave"> 👋</span>
+                </h1>
 
-            <a
-              href="#my-classes"
-              className="sd-welcome-button"
-            >
-              View My Classes
-              <ArrowUpRight size={18} />
-            </a>
-          </div>
-
-          <div
-            className="sd-welcome-art"
-            aria-hidden="true"
-          >
-            <div className="sd-art-circle sd-art-one" />
-            <div className="sd-art-circle sd-art-two" />
-
-            <div className="sd-art-main">
-              <GraduationCap size={76} />
-            </div>
-
-            <div className="sd-art-float sd-art-book">
-              <BookOpen size={26} />
-            </div>
-
-            <div className="sd-art-float sd-art-star">
-              <Sparkles size={25} />
-            </div>
-          </div>
-        </section>
-
-        {/* STATISTICS */}
-        <div className="sd-section-heading">
-          <div>
-            <span className="sd-overline">
-              ACADEMIC SNAPSHOT
-            </span>
-            <h2>My Statistics</h2>
-          </div>
-        </div>
-
-        <section className="sd-stats">
-          <div className="sd-stat-card">
-            <div className="sd-stat-icon sd-icon-blue">
-              <BookOpen size={24} />
-            </div>
-
-            <span>Enrolled Classes</span>
-
-            <strong>
-              {academicLoading ? "..." : myClasses.length}
-            </strong>
-
-            <small>Active classes</small>
-          </div>
-
-          <div className="sd-stat-card">
-            <div className="sd-stat-icon sd-icon-purple">
-              <CalendarDays size={24} />
-            </div>
-
-            <span>Weekly Sessions</span>
-
-            <strong>
-              {academicLoading ? "..." : myTimetable.length}
-            </strong>
-
-            <small>Scheduled lessons</small>
-          </div>
-
-          <div className="sd-stat-card">
-            <div className="sd-stat-icon sd-icon-green">
-              <GraduationCap size={24} />
-            </div>
-
-            <span>Current Grade</span>
-            <strong>{student.grade}</strong>
-            <small>Academic level</small>
-          </div>
-
-          <div className="sd-stat-card">
-            <div className="sd-stat-icon sd-icon-orange">
-              <CheckCircle2 size={24} />
-            </div>
-
-            <span>Profile Complete</span>
-            <strong>{profileCompletion}%</strong>
-
-            <small>
-              {completedFields} of 5 fields
-            </small>
-          </div>
-        </section>
-
-        {/* MY CLASSES */}
-        <section
-          className="sd-academic-section"
-          id="my-classes"
-        >
-          <div className="sd-section-heading">
-            <div>
-              <span className="sd-overline">
-                MY LEARNING
-              </span>
-              <h2>My Enrolled Classes</h2>
-            </div>
-
-            <span className="sd-class-count">
-              {myClasses.length} Classes
-            </span>
-          </div>
-
-          {academicLoading ? (
-            <div className="sd-academic-empty">
-              Loading your classes...
-            </div>
-          ) : academicError ? (
-            <div className="sd-academic-empty">
-              <AlertCircle size={30} />
-              {academicError}
-            </div>
-          ) : myClasses.length === 0 ? (
-            <div className="sd-academic-empty">
-              <BookOpen size={35} />
-              <h3>No enrolled classes yet</h3>
-              <p>
-                Your classes will appear here
-                once the academy assigns them.
-              </p>
-            </div>
-          ) : (
-            <div className="sd-enrolled-grid">
-              {myClasses.map((classItem) => (
-                <div
-                  className="sd-enrolled-card"
-                  key={classItem._id}
-                >
-                  <div className="sd-enrolled-top">
-                    <div className="sd-enrolled-icon">
-                      <BookOpen size={25} />
-                    </div>
-
-                    <span className="sd-grade-tag">
-                      Grade {classItem.grade}
-                    </span>
-                  </div>
-
-                  <h3>{classItem.subject}</h3>
-
-                  <p className="sd-enrolled-teacher">
-                    <Users size={15} />
-                    {classItem.teacherName}
-                  </p>
-
-                  <div className="sd-enrolled-details">
-                    <span>
-                      <MapPin size={15} />
-                      {classItem.mode === "Online"
-                        ? "Online Class"
-                        : classItem.hallNumber ||
-                          "Hall not assigned"}
-                    </span>
-
-                    <span>
-                      <CalendarClock size={15} />
-                      {classItem.schedule?.[0]
-                        ? `${classItem.schedule[0].day} • ${classItem.schedule[0].startTime}`
-                        : "Schedule pending"}
-                    </span>
-                  </div>
-
-                  <div className="sd-enrolled-bottom">
-                    <span>{classItem.classCode}</span>
-
-                    <a href="#my-timetable">
-                      View Timetable
-                      <ArrowRight size={16} />
-                    </a>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* MY TIMETABLE */}
-        <section
-          className="sd-academic-section"
-          id="my-timetable"
-        >
-          <div className="sd-section-heading">
-            <div>
-              <span className="sd-overline">
-                WEEKLY SCHEDULE
-              </span>
-              <h2>My Class Timetable</h2>
-            </div>
-          </div>
-
-          {academicLoading ? (
-            <div className="sd-academic-empty">
-              Loading timetable...
-            </div>
-          ) : academicError ? (
-            <div className="sd-academic-empty">
-              {academicError}
-            </div>
-          ) : myTimetable.length === 0 ? (
-            <div className="sd-academic-empty">
-              <CalendarDays size={35} />
-              <h3>No timetable available</h3>
-              <p>
-                Your class timetable will appear here.
-              </p>
-            </div>
-          ) : (
-            <div className="sd-timetable-list">
-              {myTimetable.map((item, index) => (
-                <div
-                  className="sd-timetable-item"
-                  key={`${item.classId}-${item.day}-${item.startTime}-${index}`}
-                >
-                  <div className="sd-timetable-day">
-                    <CalendarDays size={19} />
-                    <strong>{item.day}</strong>
-                  </div>
-
-                  <div className="sd-timetable-info">
-                    <h3>{item.subject}</h3>
-                    <p>{item.teacherName}</p>
-                  </div>
-
-                  <div className="sd-timetable-time">
-                    <CalendarClock size={16} />
-                    {item.startTime} - {item.endTime}
-                  </div>
-
-                  <span className="sd-timetable-mode">
-                    {item.mode === "Online" ? (
-                      <Monitor size={15} />
-                    ) : (
-                      <MapPin size={15} />
-                    )}
-
-                    {item.mode === "Online"
-                      ? "Online"
-                      : item.hallNumber || "Physical"}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* PROFILE AND PROGRESS */}
-        <div className="sd-content-grid">
-          <section
-            className="sd-card sd-profile-card"
-            id="my-profile"
-          >
-            <div className="sd-card-header">
-              <div>
-                <h3>My Profile</h3>
-                <p>Manage your student identity</p>
-              </div>
-
-              <div className="sd-header-icon">
-                <UserRound size={19} />
-              </div>
-            </div>
-
-            <div className="sd-profile-top">
-              <div className="sd-profile-avatar">
-                {profilePhoto}
+                <p>
+                  Welcome to your personal learning
+                  dashboard. Manage your classes,
+                  timetable and academic journey
+                  with NextGen.
+                </p>
 
                 <button
-                  className="sd-camera-button"
-                  onClick={() =>
-                    fileInputRef.current?.click()
-                  }
-                  disabled={uploading}
-                  aria-label="Change profile photo"
+                  type="button"
+                  className="sd-welcome-button"
+                  onClick={() => {
+                    document.getElementById("my-classes")?.scrollIntoView({
+                      behavior: "smooth",
+                    });
+                  }}
                 >
-                  <Camera size={17} />
+                  View My Classes
+                  <ArrowUpRight size={18} />
                 </button>
               </div>
 
-              <div className="sd-profile-identity">
-                <h3>{student.name}</h3>
+              <div className="sd-welcome-art" aria-hidden="true">
+                <div className="sd-art-circle sd-art-one" />
+                <div className="sd-art-circle sd-art-two" />
 
-                <span>
-                  <GraduationCap size={14} />
-                  Grade {student.grade} Student
+                <div className="sd-art-main">
+                  <GraduationCap size={76} />
+                </div>
+
+                <div className="sd-art-float sd-art-book">
+                  <BookOpen size={26} />
+                </div>
+
+                <div className="sd-art-float sd-art-star">
+                  <Sparkles size={25} />
+                </div>
+              </div>
+            </section>
+
+            {/* STATISTICS */}
+            <div className="sd-section-heading">
+              <div>
+                <span className="sd-overline">
+                  ACADEMIC SNAPSHOT
                 </span>
-
-                <small>
-                  {student.registrationNumber}
-                </small>
+                <h2>My Statistics</h2>
               </div>
             </div>
 
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={handlePhotoUpload}
-              hidden
-            />
+            <section className="sd-stats">
+              <div className="sd-stat-card">
+                <div className="sd-stat-icon sd-icon-blue">
+                  <BookOpen size={24} />
+                </div>
 
-            <div className="sd-photo-actions">
+                <span>Enrolled Classes</span>
+                <strong>
+                  {academicLoading ? "..." : myClasses.length}
+                </strong>
+                <small>Active classes</small>
+              </div>
+
+              <div className="sd-stat-card">
+                <div className="sd-stat-icon sd-icon-purple">
+                  <CalendarDays size={24} />
+                </div>
+
+                <span>Weekly Sessions</span>
+                <strong>
+                  {academicLoading ? "..." : myTimetable.length}
+                </strong>
+                <small>Scheduled lessons</small>
+              </div>
+
+              <div className="sd-stat-card">
+                <div className="sd-stat-icon sd-icon-green">
+                  <GraduationCap size={24} />
+                </div>
+
+                <span>Current Grade</span>
+                <strong>{student.grade}</strong>
+                <small>Academic level</small>
+              </div>
+
+              <div className="sd-stat-card">
+                <div className="sd-stat-icon sd-icon-orange">
+                  <CheckCircle2 size={24} />
+                </div>
+
+                <span>Profile Complete</span>
+                <strong>{profileCompletion}%</strong>
+                <small>{completedFields} of 5 fields</small>
+              </div>
+            </section>
+
+            {/* MY CLASSES */}
+            <section
+              className="sd-academic-section"
+              id="my-classes"
+            >
+              <div className="sd-section-heading">
+                <div>
+                  <span className="sd-overline">
+                    MY LEARNING
+                  </span>
+                  <h2>My Enrolled Classes</h2>
+                </div>
+
+                <span className="sd-class-count">
+                  {myClasses.length} Classes
+                </span>
+              </div>
+
+              {academicLoading ? (
+                <div className="sd-academic-empty">
+                  Loading your classes...
+                </div>
+              ) : academicError ? (
+                <div className="sd-academic-empty">
+                  <AlertCircle size={30} />
+                  {academicError}
+                </div>
+              ) : myClasses.length === 0 ? (
+                <div className="sd-academic-empty">
+                  <BookOpen size={35} />
+                  <h3>No enrolled classes yet</h3>
+                  <p>
+                    Your classes will appear here
+                    once the academy assigns them.
+                  </p>
+                </div>
+              ) : (
+                <div className="sd-enrolled-grid">
+                  {myClasses.map((classItem) => (
+                    <div
+                      className="sd-enrolled-card"
+                      key={classItem._id}
+                    >
+                      <div className="sd-enrolled-top">
+                        <div className="sd-enrolled-icon">
+                          <BookOpen size={25} />
+                        </div>
+
+                        <span className="sd-grade-tag">
+                          Grade {classItem.grade}
+                        </span>
+                      </div>
+
+                      <h3>{classItem.subject}</h3>
+
+                      <p className="sd-enrolled-teacher">
+                        <Users size={15} />
+                        {classItem.teacherName}
+                      </p>
+
+                      <div className="sd-enrolled-details">
+                        <span>
+                          <MapPin size={15} />
+                          {classItem.mode === "Online"
+                            ? "Online Class"
+                            : classItem.hallNumber || "Hall not assigned"}
+                        </span>
+
+                        <span>
+                          <CalendarClock size={15} />
+                          {classItem.schedule?.[0]
+                            ? `${classItem.schedule[0].day} • ${classItem.schedule[0].startTime}`
+                            : "Schedule pending"}
+                        </span>
+                      </div>
+
+                      <div className="sd-enrolled-bottom">
+                        <span>{classItem.classCode}</span>
+
+                        <a
+                          href="#my-timetable"
+                          onClick={() => {
+                            document.getElementById("my-timetable")?.scrollIntoView({
+                              behavior: "smooth",
+                            });
+                          }}
+                        >
+                          View Timetable
+                          <ArrowRight size={16} />
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* MY TIMETABLE */}
+            <section
+              className="sd-academic-section"
+              id="my-timetable"
+            >
+              <div className="sd-section-heading">
+                <div>
+                  <span className="sd-overline">
+                    WEEKLY SCHEDULE
+                  </span>
+                  <h2>My Class Timetable</h2>
+                </div>
+              </div>
+
+              {academicLoading ? (
+                <div className="sd-academic-empty">
+                  Loading timetable...
+                </div>
+              ) : academicError ? (
+                <div className="sd-academic-empty">
+                  {academicError}
+                </div>
+              ) : myTimetable.length === 0 ? (
+                <div className="sd-academic-empty">
+                  <CalendarDays size={35} />
+                  <h3>No timetable available</h3>
+                  <p>
+                    Your class timetable will appear here.
+                  </p>
+                </div>
+              ) : (
+                <div className="sd-timetable-list">
+                  {myTimetable.map((item, index) => (
+                    <div
+                      className="sd-timetable-item"
+                      key={`${item.classId}-${item.day}-${item.startTime}-${index}`}
+                    >
+                      <div className="sd-timetable-day">
+                        <CalendarDays size={19} />
+                        <strong>{item.day}</strong>
+                      </div>
+
+                      <div className="sd-timetable-info">
+                        <h3>{item.subject}</h3>
+                        <p>{item.teacherName}</p>
+                      </div>
+
+                      <div className="sd-timetable-time">
+                        <CalendarClock size={16} />
+                        {item.startTime} - {item.endTime}
+                      </div>
+
+                      <span className="sd-timetable-mode">
+                        {item.mode === "Online" ? (
+                          <Monitor size={15} />
+                        ) : (
+                          <MapPin size={15} />
+                        )}
+
+                        {item.mode === "Online"
+                          ? "Online"
+                          : item.hallNumber || "Physical"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* QUICK ACCESS */}
+            <div className="sd-section-heading sd-quick-heading">
+              <div>
+                <span className="sd-overline">
+                  LEARNING RESOURCES
+                </span>
+                <h2>Quick Access</h2>
+              </div>
+            </div>
+
+            <section className="sd-quick-grid">
               <button
-                className="sd-upload-button"
-                onClick={() =>
-                  fileInputRef.current?.click()
-                }
-                disabled={uploading || removing}
+                type="button"
+                className="sd-quick-card"
+                onClick={() => {
+                  document.getElementById("my-classes")?.scrollIntoView({
+                    behavior: "smooth",
+                  });
+                }}
               >
-                <Upload size={16} />
-                {uploading ? "Uploading..." : "Upload Photo"}
+                <div className="sd-quick-icon sd-icon-blue">
+                  <BookOpen size={25} />
+                </div>
+
+                <div>
+                  <h3>My Classes</h3>
+                  <p>View your enrolled subjects</p>
+                </div>
+
+                <ArrowUpRight
+                  className="sd-quick-arrow"
+                  size={19}
+                />
               </button>
 
-              {student.hasPhoto && (
+              <button
+                type="button"
+                className="sd-quick-card"
+                onClick={() => {
+                  document.getElementById("my-timetable")?.scrollIntoView({
+                    behavior: "smooth",
+                  });
+                }}
+              >
+                <div className="sd-quick-icon sd-icon-purple">
+                  <CalendarDays size={25} />
+                </div>
+
+                <div>
+                  <h3>My Timetable</h3>
+                  <p>View your weekly schedule</p>
+                </div>
+
+                <ArrowUpRight
+                  className="sd-quick-arrow"
+                  size={19}
+                />
+              </button>
+            </section>
+
+            <footer className="sd-footer">
+              <span>
+                © {new Date().getFullYear()} NextGen Education Academy
+              </span>
+              <span>Learn • Grow • Succeed</span>
+            </footer>
+          </>
+        )}
+
+        {/* MY PROFILE PAGE */}
+        {activeSection === "profile" && (
+          <section className="sd-profile-page">
+
+            <div className="sd-profile-page-heading">
+              <div>
+                <span className="sd-overline">
+                  STUDENT ACCOUNT
+                </span>
+                <h1>My Profile</h1>
+                <p>
+                  View and manage your personal information.
+                </p>
+              </div>
+
+              {!editingProfile && (
                 <button
-                  className="sd-remove-button"
-                  onClick={handleRemovePhoto}
-                  disabled={uploading || removing}
+                  type="button"
+                  className="sd-edit-profile-button"
+                  onClick={() => {
+                    setProfileForm({
+                      name: student.name || "",
+                      email: student.email || "",
+                    });
+
+                    setEditingProfile(true);
+                    setNotice("");
+                  }}
                 >
-                  <Trash2 size={16} />
-                  {removing ? "Removing..." : "Remove"}
+                  <Pencil size={17} />
+                  Edit Profile
                 </button>
               )}
             </div>
 
-            <p className="sd-photo-hint">
-              <ImagePlus size={14} />
-              JPG, PNG or WEBP • Max 2 MB
-            </p>
+            <div className="sd-profile-page-card">
 
-            {notice && (
-              <p className="sd-notice">
-                {notice}
-              </p>
-            )}
+              {/* PROFILE HEADER */}
+              <div className="sd-profile-page-top">
+                <div className="sd-profile-avatar">
+                  {profilePhoto}
 
-            <div className="sd-profile-details">
-              <div className="sd-detail-row">
-                <Mail size={18} />
+                  <button
+                    type="button"
+                    className="sd-camera-button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading || removing}
+                    aria-label="Change profile photo"
+                  >
+                    <Camera size={17} />
+                  </button>
+                </div>
 
                 <div>
-                  <span>Email Address</span>
-                  <strong>{student.email}</strong>
+                  <h2>{student.name}</h2>
+
+                  <span className="sd-profile-grade">
+                    <GraduationCap size={15} />
+                    Grade {student.grade} Student
+                  </span>
+
+                  <p>{student.registrationNumber}</p>
                 </div>
               </div>
 
-              <div className="sd-detail-row">
-                <Hash size={18} />
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handlePhotoUpload}
+                hidden
+              />
 
-                <div>
-                  <span>Registration Number</span>
-                  <strong>
-                    {student.registrationNumber}
-                  </strong>
-                </div>
-              </div>
+              {/* PHOTO ACTIONS */}
+              <div className="sd-photo-actions">
+                <button
+                  type="button"
+                  className="sd-upload-button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading || removing}
+                >
+                  <Upload size={16} />
+                  {uploading ? "Uploading..." : "Upload Photo"}
+                </button>
 
-              <div className="sd-detail-row">
-                <Clock3 size={18} />
-
-                <div>
-                  <span>Member Since</span>
-                  <strong>{joinedDate}</strong>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section className="sd-card sd-progress-card">
-            <div className="sd-card-header">
-              <div>
-                <h3>Profile Progress</h3>
-                <p>Your account setup overview</p>
-              </div>
-
-              <div className="sd-header-icon">
-                <CheckCircle2 size={19} />
-              </div>
-            </div>
-
-            <div className="sd-progress-center">
-              <div
-                className="sd-progress-ring"
-                style={{
-                  "--progress": `${profileCompletion}%`,
-                }}
-              >
-                <div className="sd-progress-inner">
-                  <strong>{profileCompletion}%</strong>
-                  <span>Completed</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="sd-progress-items">
-              <div>
-                <CheckCircle2 size={17} />
-                Account created
-                <span>Done</span>
-              </div>
-
-              <div>
-                <CheckCircle2 size={17} />
-                Student details added
-                <span>Done</span>
-              </div>
-
-              <div>
-                {student.hasPhoto ? (
-                  <CheckCircle2 size={17} />
-                ) : (
-                  <Camera size={17} />
+                {student.hasPhoto && (
+                  <button
+                    type="button"
+                    className="sd-remove-button"
+                    onClick={handleRemovePhoto}
+                    disabled={uploading || removing}
+                  >
+                    <Trash2 size={16} />
+                    {removing ? "Removing..." : "Remove Photo"}
+                  </button>
                 )}
-
-                Profile picture
-
-                <span>
-                  {student.hasPhoto ? "Done" : "Pending"}
-                </span>
               </div>
+
+              <p className="sd-photo-hint">
+                <ImagePlus size={14} />
+                JPG, PNG or WEBP • Maximum 2 MB
+              </p>
+
+              {notice && (
+                <p className="sd-notice">
+                  {notice}
+                </p>
+              )}
+
+              <div className="sd-profile-divider" />
+
+              {/* EDIT PROFILE FORM */}
+              {editingProfile ? (
+                <form
+                  className="sd-profile-form"
+                  onSubmit={handleProfileSave}
+                >
+                  <div className="sd-profile-field">
+                    <label htmlFor="profileName">
+                      Full Name
+                    </label>
+
+                    <input
+                      id="profileName"
+                      type="text"
+                      value={profileForm.name}
+                      onChange={(event) =>
+                        setProfileForm((previous) => ({
+                          ...previous,
+                          name: event.target.value,
+                        }))
+                      }
+                      required
+                    />
+                  </div>
+
+                  <div className="sd-profile-field">
+                    <label htmlFor="profileEmail">
+                      Email Address
+                    </label>
+
+                    <input
+                      id="profileEmail"
+                      type="email"
+                      value={profileForm.email}
+                      onChange={(event) =>
+                        setProfileForm((previous) => ({
+                          ...previous,
+                          email: event.target.value,
+                        }))
+                      }
+                      required
+                    />
+                  </div>
+
+                  <div className="sd-profile-field">
+                    <label>Registration Number</label>
+
+                    <input
+                      type="text"
+                      value={student.registrationNumber}
+                      disabled
+                    />
+
+                    <small>
+                      Issued by the academy. Cannot be changed.
+                    </small>
+                  </div>
+
+                  <div className="sd-profile-field">
+                    <label>Grade</label>
+
+                    <input
+                      type="text"
+                      value={`Grade ${student.grade}`}
+                      disabled
+                    />
+
+                    <small>
+                      Contact the academy to change your grade.
+                    </small>
+                  </div>
+
+                  <div className="sd-profile-form-actions">
+                    <button
+                      type="button"
+                      className="sd-cancel-button"
+                      onClick={handleCancelEdit}
+                      disabled={savingProfile}
+                    >
+                      <XCircle size={16} />
+                      Cancel
+                    </button>
+
+                    <button
+                      type="submit"
+                      className="sd-save-profile-button"
+                      disabled={savingProfile}
+                    >
+                      <Save size={16} />
+                      {savingProfile ? "Saving..." : "Save Changes"}
+                    </button>
+                  </div>
+                </form>
+              ) : (
+
+                /* PROFILE INFORMATION */
+                <div className="sd-profile-information">
+                  <div className="sd-profile-info-item">
+                    <UserRound size={19} />
+
+                    <div>
+                      <span>Full Name</span>
+                      <strong>{student.name}</strong>
+                    </div>
+                  </div>
+
+                  <div className="sd-profile-info-item">
+                    <Mail size={19} />
+
+                    <div>
+                      <span>Email Address</span>
+                      <strong>{student.email}</strong>
+                    </div>
+                  </div>
+
+                  <div className="sd-profile-info-item">
+                    <Hash size={19} />
+
+                    <div>
+                      <span>Registration Number</span>
+                      <strong>{student.registrationNumber}</strong>
+                    </div>
+                  </div>
+
+                  <div className="sd-profile-info-item">
+                    <GraduationCap size={19} />
+
+                    <div>
+                      <span>Current Grade</span>
+                      <strong>Grade {student.grade}</strong>
+                    </div>
+                  </div>
+
+                  <div className="sd-profile-info-item">
+                    <Clock3 size={19} />
+
+                    <div>
+                      <span>Member Since</span>
+                      <strong>{joinedDate}</strong>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {!student.hasPhoto && (
-              <button
-                className="sd-progress-action"
-                onClick={() =>
-                  fileInputRef.current?.click()
-                }
-              >
-                Complete your profile
-                <ChevronRight size={18} />
-              </button>
-            )}
+            <footer className="sd-footer">
+              <span>
+                © {new Date().getFullYear()} NextGen Education Academy
+              </span>
+              <span>Learn • Grow • Succeed</span>
+            </footer>
           </section>
-        </div>
-
-        {/* QUICK ACCESS */}
-        <div className="sd-section-heading sd-quick-heading">
-          <div>
-            <span className="sd-overline">
-              LEARNING RESOURCES
-            </span>
-            <h2>Quick Access</h2>
-          </div>
-        </div>
-
-        <section className="sd-quick-grid">
-          <a
-            href="#my-classes"
-            className="sd-quick-card"
-          >
-            <div className="sd-quick-icon sd-icon-blue">
-              <BookOpen size={25} />
-            </div>
-
-            <div>
-              <h3>My Classes</h3>
-              <p>View your enrolled subjects</p>
-            </div>
-
-            <ArrowUpRight
-              className="sd-quick-arrow"
-              size={19}
-            />
-          </a>
-
-          <a
-            href="#my-timetable"
-            className="sd-quick-card"
-          >
-            <div className="sd-quick-icon sd-icon-purple">
-              <CalendarDays size={25} />
-            </div>
-
-            <div>
-              <h3>My Timetable</h3>
-              <p>View your weekly schedule</p>
-            </div>
-
-            <ArrowUpRight
-              className="sd-quick-arrow"
-              size={19}
-            />
-          </a>
-        </section>
-
-        {/* DASHBOARD FOOTER */}
-        <footer className="sd-footer">
-          <span>
-            © {new Date().getFullYear()} NextGen Education Academy
-          </span>
-
-          <span>Learn • Grow • Succeed</span>
-        </footer>
-
+        )}
       </main>
     </div>
   );
